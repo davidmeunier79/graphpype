@@ -65,5 +65,4 @@ find dir_path -type f -print0 | xargs -0 sed -i 's/old_name/new_name/g'
 
 * example:
 
-find ~/Tools/python/Projects/my_project -type f 
--print0 | xargs -0 sed -i 's/neuropype_graph/graphpype/g'
+find ~/Tools/python/Projects/my_project -type f -print0 | xargs -0 sed -i 's/neuropype_graph/graphpype/g'
