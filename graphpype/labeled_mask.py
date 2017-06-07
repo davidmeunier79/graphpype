@@ -656,7 +656,7 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir,list_ROI_img_files
     ### save labels
     labels_list_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
     
-    np.savetxt(labels_list_file,np.array(labels,dtype = 'string'),fmt = "%s")
+    np.savetxt(labels_list_file,np.array(labels,dtype = 'str'),fmt = "%s")
     
     
     
