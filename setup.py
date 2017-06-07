@@ -16,6 +16,6 @@ setup(
                       'configparser',
                       "pandas",
                       "matplotlib",
-                      "xvfbwrapper==0.2.9"]
+                      "xvfbwrapper"]
 )
 
