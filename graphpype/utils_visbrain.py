@@ -1,5 +1,6 @@
 
 import numpy as np
+import pandas as pd
 
 from visbrain.brain.brain import Brain
 
@@ -18,7 +19,8 @@ def visu_graph_modules_roles(net_file, lol_file, coords_file, labels_file,node_r
     if modality_type == "MEG":
         coords = 1000*coords
 
-    print("coords: ", end=' ')
+    #print("coords: ", end=' ')
+    print("coords: ")
     print(coords)
 
     ########## labels 
@@ -134,7 +136,8 @@ def visu_graph_modules(net_file, lol_file, coords_file, labels_file,inter_module
     if modality_type == "MEG":
         coords = 1000*coords
 
-    print("coords: ", end=' ')
+    #print("coords: ", end=' ')
+    print("coords: ")
     print(coords)
 
     ########## labels 
@@ -200,7 +203,9 @@ def visu_graph(conmat_file,coords_file, labels_file):
 
     coords = np.loadtxt(coords_file)
 
-    print("coords: ", end=' ')
+    #print("coords: ", end=' ')
+    print("coords: ")
+    
     print(coords)
 
     ########## labels
@@ -227,3 +232,107 @@ def visu_graph(conmat_file,coords_file, labels_file):
 
     vb = Brain(s_xyz=coords, s_text=npLabels, s_textsize = 1,s_textcolor="white", c_connect = c_connect, c_colval = c_colval)
     vb.show()
+
+
+def visu_graph_signif(conmat_file,coords_file = 0, labels_file = 0):
+    
+    ########### coords
+    if coords_file:
+            
+        #coord_file = os.path.abspath("data/MEG/label_coords.txt")
+
+        coords = np.loadtxt(coords_file)
+
+        #print("coords: ", end=' ')
+        print("coords: ")
+        
+        print(coords)
+        
+    ########## labels
+    if labels_file:
+        labels = [line.strip() for line in open(labels_file)]
+        npLabels = np.array(labels)
+        print(npLabels)
+
+    ##########  net file
+    
+    if conmat_file.endswith(".csv"):
+        
+        signif_mat = pd.read_csv(conmat_file,index_col = 0).values
+        
+        print(signif_mat)
+        
+    elif conmat_file.endswith(".npy"):
+        
+        signif_mat = np.load(conmat_file)
+        print(signif_mat)
+        
+    print(signif_mat.shape)
+    
+    c_connect = np.ma.masked_array(signif_mat, mask=True)
+    #c_connect.mask[np.where((c_connect > umin) & (c_connect < umax))] = False
+
+
+    print(c_connect)
+
+    c_colval = {4:"darkred",3:"red",2:"orange",1:"yellow",-1:"cyan",-2:"cornflowerblue",-3:"blue",-4:"navy"}
+    
+    
+    #c_colval = {4:"darkred",3:"red",2:"orange",1:"yellow",-1:"cyan",-2:"cornflowerblue",-3:"blue",-4:"navy"}
+    
+    #c_colval = {-1:"grey",0:"red",1:"orange",2:"blue",3:"green",4:"yellow",5:"purple"}
+
+    vb = Brain(s_xyz=coords, s_text=npLabels, s_textsize = 1,s_textcolor="white", c_connect = c_connect, c_colval = c_colval)
+    vb.show()
+
+
+def visu_graph_multi_signif_conmat(multi_signif_conmat,coords_file = 0, labels_file = 0, c_colval = {4:"darkred",3:"red",2:"orange",1:"yellow",-1:"cyan",-2:"cornflowerblue",-3:"blue",-4:"navy"}
+    ):
+    
+    ########### coords
+    if coords_file:
+            
+        #coord_file = os.path.abspath("data/MEG/label_coords.txt")
+
+        coords = np.loadtxt(coords_file)
+
+        #print("coords: ", end=' ')
+        print("coords: ")
+        
+        print(coords)
+        
+    ########## labels
+    if labels_file:
+        labels = [line.strip() for line in open(labels_file)]
+        npLabels = np.array(labels)
+        print(npLabels)
+
+    ##########  net file
+    
+    #if conmat_file.endswith(".csv"):
+        
+        #signif_mat = pd.read_csv(conmat_file,index_col = 0).values
+        
+        #print(signif_mat)
+        
+    #elif conmat_file.endswith(".npy"):
+        
+        #signif_mat = np.load(conmat_file)
+        #print(signif_mat)
+        
+    #print(signif_mat.shape)
+    
+    c_connect = np.ma.masked_array(multi_signif_conmat, mask=True)
+    #c_connect.mask[np.where((c_connect > umin) & (c_connect < umax))] = False
+
+
+    print(c_connect)
+
+    
+    #c_colval = {4:"darkred",3:"red",2:"orange",1:"yellow",-1:"cyan",-2:"cornflowerblue",-3:"blue",-4:"navy"}
+    
+    #c_colval = {-1:"grey",0:"red",1:"orange",2:"blue",3:"green",4:"yellow",5:"purple"}
+
+    vb = Brain(s_xyz=coords, s_text=npLabels, s_textsize = 1,s_textcolor="black", c_connect = c_connect, c_colval = c_colval)
+    vb.show()
+
