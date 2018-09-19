@@ -1994,10 +1994,10 @@ class PrepareMeanCorrelInputSpec(BaseInterfaceInputSpec):
     #labels_file = File(exists=True, desc='reference labels',mandatory=False)
 
     coords_files = traits.List(File(
-        exists=True), desc='list of all coordinates in numpy space files (in txt format) for each subject (after removal of non void data)', mandatory=True, xor=['labels_files'])
+        exists=True), desc='list of all coordinates in numpy space files (in txt format) for each subject (after removal of non void data)', mandatory=False)
 
     labels_files = traits.List(File(
-        exists=True), desc='list of labels (in txt format) for each subject (after removal of non void data)', mandatory=True, xor=['coords_files'])
+        exists=True), desc='list of labels (in txt format) for each subject (after removal of non void data)', mandatory=False)
 
     gm_mask_coords_file = File(
         exists=True, desc='Coordinates in numpy space, corresponding to all possible nodes in the original space', mandatory=False)
@@ -2218,6 +2218,14 @@ class PrepareMeanCorrel(BaseInterface):
                     print("Warning, one or more files between " +
                           cor_mat_files[index_file] + ', ' + labels_files[index_file] + " do not exists")
 
+        else:
+            
+            group_cor_mat_matrix = np.array([np.load(cor_mat_file) for cor_mat_file in cor_mat_files 
+                                             if os.path.exists(cor_mat_file)])
+            sum_cor_mat_matrix = np.sum(group_cor_mat_matrix, axis = 0)
+            
+            sum_possible_edge_matrix = np.ones(shape = sum_cor_mat_matrix.shape)*len(cor_mat_files) 
+            
         self.group_cor_mat_matrix_file = os.path.abspath(
             'group_cor_mat_matrix.npy')
 
