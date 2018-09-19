@@ -48,7 +48,6 @@ def test_comm_rada():
 
 def test_net_prop_rada():
     """test NetPropRada"""
-
     net_prop_rada = NetPropRada()
     net_prop_rada.inputs.Pajek_net_file = Pajek_net_file
 
@@ -67,3 +66,7 @@ def test_net_prop_rada():
     os.remove(val.nodes_file)
     os.remove(val.edges_betw_file)
     os.remove(val.rada_log_file)
+<<<<<<< HEAD
+
+=======
+>>>>>>> added test_net_prop_rada
