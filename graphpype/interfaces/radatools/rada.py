@@ -25,7 +25,8 @@ class PrepRadaInputSpec(CommandLineInputSpec):
 
     network_type = traits.Enum(
         "A", "U", "D", usedefault=True,
-        desc='Type of network, force to undirected', position=2,
+        desc='Type of network, default A = "auto", U = force to undirected',
+        position=2,
         argstr="%s")
 
 
