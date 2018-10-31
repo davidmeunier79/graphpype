@@ -671,9 +671,8 @@ class ConcatTS(BaseInterface):
             "concatenated_ts.npy")
         return outputs
 
+
 # MergeTS
-
-
 class MergeTSInputSpec(BaseInterfaceInputSpec):
 
     all_ts_files = traits.List(File(
@@ -816,8 +815,6 @@ class SeparateTS(BaseInterface):
         return outputs
 
 # RegressCovar
-
-
 class RegressCovarInputSpec(BaseInterfaceInputSpec):
     masked_ts_file = File(
         exists=True, desc='time series in npy format', mandatory=True)

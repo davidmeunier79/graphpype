@@ -54,6 +54,11 @@ def test_extract_mean_ts():
     # TODO raise Error if incompatible images
 
 
+def test_regress_covar():
+    regress_covar = RegressCovar()
+    regress_covar.inputs.file_4D = img_file
+    
+    
 # test_extract_ts()
 # test_intersect_mask()
 test_extract_mean_ts()
