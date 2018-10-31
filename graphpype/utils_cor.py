@@ -19,11 +19,9 @@ def mean_select_mask_data(data_img, data_mask):
         and mask are incompatible {} {}".format(data_img.shape,
                                                 data_mask.shape))
 
-    print("Image and mask are compatible")
     masked_data_matrix = data_img[data_mask == 1, :]
 
     try:
-        print("ok nanmean")
         mean_mask_data_matrix = np.nanmean(masked_data_matrix, axis=0)
 
     except AttributeError:
@@ -31,15 +29,19 @@ def mean_select_mask_data(data_img, data_mask):
         print("no nanmean (version of numpy is too old), using mean only")
         mean_mask_data_matrix = np.mean(masked_data_matrix, axis=0)
 
-    return np.array(mean_mask_data_matrix)
+    return mean_mask_data_matrix
 
 
-def mean_select_indexed_mask_data(orig_ts, indexed_mask_rois_data,
+def mean_select_indexed_mask_data(data_img, data_indexed_mask,
                                   min_BOLD_intensity=50, percent_signal=0.5,
                                   background_val=-1.0):
     """extrating ts by averaging the time series of all voxels with the same
     index"""
-    sequence_roi_index = np.unique(indexed_mask_rois_data)
+    assert np.all(data_img.shape[:3] == data_indexed_mask.shape), ("Error, \
+        Image and mask are incompatible {} {}".format(data_img.shape,
+                                                      data_indexed_mask.shape))
+
+    sequence_roi_index = np.unique(data_indexed_mask)
 
     if sequence_roi_index[0] == background_val:
         sequence_roi_index = sequence_roi_index[1:]
@@ -52,9 +54,9 @@ def mean_select_indexed_mask_data(orig_ts, indexed_mask_rois_data,
 
     for i, roi_index in enumerate(sequence_roi_index):
 
-        roi_x, roi_y, roi_z = np.where(indexed_mask_rois_data == roi_index)
+        roi_x, roi_y, roi_z = np.where(data_indexed_mask == roi_index)
 
-        all_voxel_roi_ts = orig_ts[roi_x, roi_y, roi_z, :]
+        all_voxel_roi_ts = data_img[roi_x, roi_y, roi_z, :]
         nb_voxels, nb_volumes = all_voxel_roi_ts.shape
 
         # testing if at least 50% of the voxels in the ROIs have values

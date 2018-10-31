@@ -31,8 +31,6 @@ from graphpype.utils import check_np_dimension
 
 
 # ExtractTS
-
-
 class ExtractTSInputSpec(BaseInterfaceInputSpec):
     indexed_rois_file = File(
         exists=True, desc='indexed mask where all voxels belonging to the same\
@@ -233,8 +231,6 @@ class ExtractTS(BaseInterface):
 
 
 # IntersectMask
-
-
 class IntersectMaskInputSpec(BaseInterfaceInputSpec):
 
     indexed_rois_file = File(
@@ -280,7 +276,6 @@ class IntersectMaskOutputSpec(TraitedSpec):
 
 
 class IntersectMask(BaseInterface):
-
     """
     Description:
 
@@ -336,7 +331,6 @@ class IntersectMask(BaseInterface):
             type = File, exists=False, desc='filtered MNI coords txt file'
 
     """
-
     input_spec = IntersectMaskInputSpec
     output_spec = IntersectMaskOutputSpec
 
@@ -367,11 +361,7 @@ class IntersectMask(BaseInterface):
         filter_mask_data[filter_mask_data > filter_thr] = 1.0
         filter_mask_data[filter_mask_data <= filter_thr] = 0.0
 
-        # print np.unique(filter_mask_data)
-        print("indexed_rois_data:")
-        print(np.unique(indexed_rois_data))
-        print(len(np.unique(indexed_rois_data)))
-
+        # keep_rois_data
         if background_val == -1.0:
 
             val = filter_mask_data*(indexed_rois_data.copy()+1) - 1
@@ -381,87 +371,59 @@ class IntersectMask(BaseInterface):
             keep_rois_data = np.array(filter_mask_data * indexed_rois_data,
                                       dtype='int64')
 
-        print("reorder_indexed_rois:")
+        # reorder_indexed_rois (starting from -1 (background) and raising by 1
+        # for all available ROI
         reorder_indexed_rois_data = np.zeros(
             shape=keep_rois_data.shape, dtype='int64') - 1
 
-        i = 0
-
-        for index in np.unique(keep_rois_data)[1:]:
-
-            print(i, index)
-
+        for i, index in enumerate(np.unique(keep_rois_data)[1:]):
             assert np.sum(np.array(keep_rois_data == index, dtype=int)), \
                 ("Error, could not find value {} in \
                  keep_rois_data".format(index))
-
             reorder_indexed_rois_data[keep_rois_data == index] = i
-            i = i+1
 
-        # print(np.unique(reorder_indexed_rois_data))
-
-        reorder_indexed_rois_img_file = os.path.abspath(
-            "reorder_filtered_indexed_rois.nii")
         nib.save(nib.Nifti1Image(
             reorder_indexed_rois_data,
             indexed_rois_img.get_affine(),
             indexed_rois_img.get_header()),
-            reorder_indexed_rois_img_file)
+            os.path.abspath("reorder_filtered_indexed_rois.nii"))
 
-        print('unique np.unique(keep_rois_data)')
-        print(np.unique(keep_rois_data))
-
-        print("index_corres:")
-
+        # index_corres
         if background_val == -1.0:
             index_corres = np.unique(keep_rois_data)[1:]
 
         elif background_val == 0.0:
             index_corres = np.unique(keep_rois_data)[1:]-1
 
-        print(index_corres)
-        print(len(index_corres))
-
+        # if ROI coordinates
         if isdefined(coords_rois_file):
-
-            # loading ROI coordinates
             coords_rois = np.loadtxt(coords_rois_file)
-
             filtered_coords_rois = coords_rois[index_corres, :]
-
             filtered_coords_rois_file = os.path.abspath(
                 "filtered_coords_rois.txt")
             np.savetxt(filtered_coords_rois_file,
                        filtered_coords_rois, fmt="%d")
 
+        # if ROI MNI coordinates
         if isdefined(MNI_coords_rois_file):
-
-            # loading ROI coordinates
             MNI_coords_rois = np.loadtxt(MNI_coords_rois_file)
-
             filtered_MNI_coords_rois = MNI_coords_rois[index_corres, :]
-
             filtered_MNI_coords_rois_file = os.path.abspath(
                 "filtered_MNI_coords_rois.txt")
             np.savetxt(filtered_MNI_coords_rois_file,
                        filtered_MNI_coords_rois, fmt="%f")
 
+        # if ROI labels
         if isdefined(labels_rois_file):
-
-            print('extracting node labels')
             np_labels_rois = np.array(
                 [line.strip() for line in open(labels_rois_file)], dtype='str')
-
             filtered_labels_rois = np_labels_rois[index_corres]
-
             filtered_labels_rois_file = os.path.abspath(
                 "filtered_labels_rois.txt")
             np.savetxt(filtered_labels_rois_file,
                        filtered_labels_rois, fmt="%s")
 
         return runtime
-
-        # return mean_masked_ts_file,subj_coord_rois_file
 
     def _list_outputs(self):
 
@@ -486,8 +448,6 @@ class IntersectMask(BaseInterface):
 
 
 # ExtractMeanTS
-
-
 class ExtractMeanTSInputSpec(BaseInterfaceInputSpec):
 
     file_4D = File(
@@ -581,58 +541,38 @@ class ExtractMeanTS(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        print('in select_ts_with_mask')
-
         file_4D = self.inputs.file_4D
         ROI_coord = self.inputs.ROI_coord
         mask_file = self.inputs.mask_file
         filter_mask_file = self.inputs.filter_mask_file
         filter_thr = self.inputs.filter_thr
         plot_fig = self.inputs.plot_fig
-
         suffix = self.inputs.suffix
-
-        print("loading img data " + file_4D)
 
         # Reading 4D volume file to extract time series
         img = nib.load(file_4D)
         img_data = img.get_data()
 
-        print(img_data.shape)
-
         # Reading 3D mask file
         if isdefined(mask_file):
-
-            print("loading mask data " + mask_file)
-
             mask_data = nib.load(mask_file).get_data()
 
         elif isdefined(filter_mask_file) and isdefined(filter_thr):
-            print("loading filter mask data " + filter_mask_file)
-
             filter_mask_data = nib.load(filter_mask_file).get_data()
-
             mask_data = np.zeros(shape=filter_mask_data.shape, dtype='int')
-
             mask_data[filter_mask_data > filter_thr] = 1
 
         elif isdefined(ROI_coord):
-
             mask_data = np.zeros(shape=img_data.shape[:3], dtype=int)
-
             ROI_coord = np.array(ROI_coord, dtype=int)
-
             assert check_np_dimension(mask_data.shape, ROI_coord), \
                 ("Error, non compatible indexes {} with shape {}".format(
                     ROI_coord, mask_data.shape))
-
             mask_data[ROI_coord[0], ROI_coord[1], ROI_coord[2]] = 1
 
         else:
-            print("Error, either mask_file or (filter_mask_file and \
-                filter_thr) should be defined")
-
-            return
+            raise(ValueError, "Error, either mask_file or (filter_mask_file \
+                and filter_thr) or ROI_coord should be defined")
 
         # Retaining only time series who are within the mask + non_zero
         mean_masked_ts = mean_select_mask_data(img_data, mask_data)
@@ -642,11 +582,10 @@ class ExtractMeanTS(BaseInterface):
         np.savetxt(mean_masked_ts_file, mean_masked_ts, fmt='%.3f')
 
         if plot_fig:
-
             # plotting mean_masked_ts
-            plot_mean_masked_ts_file = os.path.abspath(
-                'mean_' + suffix + '_ts.eps')
-            plot_signals(plot_mean_masked_ts_file, mean_masked_ts)
+            plot_signals(
+                os.path.abspath('mean_' + suffix + '_ts.eps'),
+                mean_masked_ts)
 
         return runtime
 
@@ -659,6 +598,7 @@ class ExtractMeanTS(BaseInterface):
 
         else:
             suffix = "suf"
+
         outputs["mean_masked_ts_file"] = os.path.abspath(
             'mean_' + suffix + '_ts.txt')
 
@@ -666,8 +606,6 @@ class ExtractMeanTS(BaseInterface):
 
 
 # ConcatTS
-
-
 class ConcatTSInputSpec(BaseInterfaceInputSpec):
 
     all_ts_file = File(
