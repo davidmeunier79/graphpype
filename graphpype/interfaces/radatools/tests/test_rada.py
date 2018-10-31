@@ -43,6 +43,3 @@ def test_comm_rada():
     os.remove(val.rada_lol_file)
     os.remove(val.rada_log_file)
     os.remove(val.lol_log_file)
-
-
-test_prep_rada()
