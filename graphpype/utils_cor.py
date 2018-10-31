@@ -40,16 +40,14 @@ def mean_select_indexed_mask_data(data_img, data_indexed_mask,
     assert np.all(data_img.shape[:3] == data_indexed_mask.shape), ("Error, \
         Image and mask are incompatible {} {}".format(data_img.shape,
                                                       data_indexed_mask.shape))
-
+    # sequence_roi_index
     sequence_roi_index = np.unique(data_indexed_mask)
 
     if sequence_roi_index[0] == background_val:
         sequence_roi_index = sequence_roi_index[1:]
 
-    print("sequence_roi_index: {}".format(sequence_roi_index))
-
+    # mean_masked_ts
     mean_masked_ts = []
-
     keep_rois = np.zeros(shape=(sequence_roi_index.shape[0]), dtype=bool)
 
     for i, roi_index in enumerate(sequence_roi_index):
@@ -80,7 +78,7 @@ def mean_select_indexed_mask_data(data_img, data_indexed_mask,
             mean_masked_ts.append(mean_all_voxel_roi_ts)
         else:
             print("ROI {} was not selected : {} {} ".format(
-                roi_index, nb_signal_voxels, percent_voxel_signal))
+                roi_index, nb_signal_voxels, round(percent_voxel_signal, 2)))
 
     assert len(mean_masked_ts) != 0, "min_BOLD_intensity {} and \
         percent_signal {} are to restrictive".format(min_BOLD_intensity,
@@ -145,8 +143,6 @@ def return_conf_cor_mat(ts_mat, weight_vect, conf_interval_prob=0.01):
     assert ts_mat.shape[0] == len(weight_vect), \
         ("Error, incompatible regressor length {} {}".format(ts_mat.shape[0],
                                                              len(weight_vect)))
-
-    print(weight_vect)
 
     keep = weight_vect > 0.0
     w = weight_vect[keep]
