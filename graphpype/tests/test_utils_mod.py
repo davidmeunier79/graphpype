@@ -13,7 +13,8 @@ from graphpype.utils_mod import (get_modularity_value_from_lol_file,
                                  get_strength_neg_values_from_info_nodes_file,
                                  get_degree_pos_values_from_info_nodes_file,
                                  get_degree_neg_values_from_info_nodes_file,
-                                 compute_roles)
+                                 compute_roles, count_inter_module_density,
+                                 count_modules_density)
 
 data_path = os.path.join(nd.__path__[0], "data", "data_con")
 
@@ -125,4 +126,25 @@ def test_compute_roles():
     node_corres, sparse_matrix = read_Pajek_corres_nodes_and_sparse_matrix(
         Pajek_net_file)
     val = compute_roles(community_vect, sparse_matrix, role_type='4roles')
-    return val
+    print(val)
+
+
+def test_count_inter_module_density():
+    """
+    test count_inter_module_density
+    """
+    count_inter_module_density(lol_file, Pajek_net_file, corres=False,
+                               export_excel=False)
+
+    assert(os.path.exists("pos_nb_edges.csv"))
+    assert(os.path.exists("neg_nb_edges.csv"))
+
+
+def test_count_modules_density():
+    """
+    test count_modules_density
+    """
+    count_modules_density(lol_file, Pajek_net_file, corres=False,
+                          export_excel=False)
+
+    assert(os.path.exists("res_mod.csv"))
