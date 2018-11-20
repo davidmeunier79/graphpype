@@ -323,3 +323,137 @@ class ComputeNodeRoles(BaseInterface):
             'all_participation_coeff.txt')
 
         return outputs
+
+
+
+# ComputeNodeRoles
+
+
+class ComputeNodeRolesInputSpec(BaseInterfaceInputSpec):
+
+    rada_lol_file = File(
+        exists=True,
+        desc='lol file, describing modular structure of the network',
+        mandatory=True)
+
+    Pajek_net_file = File(
+        exists=True,
+        desc='net description in Pajek format', mandatory=True)
+
+    role_type = traits.Enum('Amaral_roles', '4roles',
+                            desc='definition of node roles',
+                            usedefault=True)
+
+
+class ComputeNodeRolesOutputSpec(TraitedSpec):
+
+    node_roles_file = File(exists=True, desc="node roles with an integer code")
+
+    all_Z_com_degree_file = File(
+        exists=True,
+        desc="value of quantity, describing the hub/non-hub role of the nodes")
+
+    all_participation_coeff_file = File(
+        exists=True,
+        desc="value of quality, descibing the provincial/connector role of the\
+            nodes")
+
+
+class ComputeNodeRoles(BaseInterface):
+
+    """
+    Description:
+
+    Compute node roles from lol modular partition and original network
+
+    Inputs:
+
+        rada_lol_file:
+            type = File, exists=True,
+            desc='lol file, describing modular structure of the network',
+            mandatory=True
+
+
+        Pajek_net_file:
+            type = File, exists=True, desc='net description in Pajek format',
+            mandatory=True
+
+        role_type:
+            One of Enum('Amaral_roles', '4roles'),
+            desc='definition of node roles, Amaral_roles = original 7 roles
+            defined for transport network (useful for big network), 4_roles =
+            defines only provincial/connecteur from participation coeff',
+            usedefault=True
+
+    Outputs:
+
+        node_roles_file:
+            type = File, exists=True, desc="node roles with an integer code"
+
+        all_Z_com_degree_file:
+            type = File,exists=True,
+            desc="value of quantity, describing the hub/non-hub role of the
+            nodes"
+
+        all_participation_coeff_file
+            type = File, exists=True,
+            desc="value of quality, descibing the provincial/connector role of
+            the nodes"
+
+    """
+    input_spec = ComputeNodeRolesInputSpec
+    output_spec = ComputeNodeRolesOutputSpec
+
+    def _run_interface(self, runtime):
+
+        rada_lol_file = self.inputs.rada_lol_file
+        Pajek_net_file = self.inputs.Pajek_net_file
+
+        print('Loading Pajek_net_file for reading node_corres')
+
+        node_corres, sparse_mat = read_Pajek_corres_nodes_and_sparse_matrix(
+            Pajek_net_file)
+
+        print(sparse_mat.todense())
+
+        print(node_corres.shape, sparse_mat.todense().shape)
+
+        print("Loading community belonging file " + rada_lol_file)
+
+        community_vect = read_lol_file(rada_lol_file)
+
+        print(community_vect)
+
+        print("Computing node roles")
+
+        node_roles, all_Z_com_degree, all_participation_coeff = compute_roles(
+            community_vect, sparse_mat, role_type=self.inputs.role_type)
+
+        print(node_roles)
+
+        node_roles_file = os.path.abspath('node_roles.txt')
+
+        np.savetxt(node_roles_file, node_roles, fmt='%d')
+
+        all_Z_com_degree_file = os.path.abspath('all_Z_com_degree.txt')
+
+        np.savetxt(all_Z_com_degree_file, all_Z_com_degree, fmt='%f')
+
+        all_participation_coeff_file = os.path.abspath(
+            'all_participation_coeff.txt')
+
+        np.savetxt(all_participation_coeff_file,
+                   all_participation_coeff, fmt='%f')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["node_roles_file"] = os.path.abspath('node_roles.txt')
+        outputs["all_Z_com_degree_file"] = os.path.abspath(
+            'all_Z_com_degree.txt')
+        outputs["all_participation_coeff_file"] = os.path.abspath(
+            'all_participation_coeff.txt')
+
+        return outputs
+
