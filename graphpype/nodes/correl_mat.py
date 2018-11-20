@@ -1692,14 +1692,12 @@ class PrepareMeanCorrelInputSpec(BaseInterfaceInputSpec):
     coords_files = traits.List(
         File(exists=True), desc='list of all coordinates in numpy space files \
             for each subject (after removal of non void data)',
-        mandatory=True,
-        xor=['labels_files'])
+        mandatory=False)
 
     labels_files = traits.List(
         File(exists=True), desc='list of labels (in txt format) for each \
             subject (after removal of non void data)',
-        mandatory=True,
-        xor=['coords_files'])
+        mandatory=False)
 
 
     gm_mask_coords_file = File(
