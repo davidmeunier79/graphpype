@@ -1,12 +1,14 @@
 import os
 import shutil
-from graphpype.nodes.modularity import (ComputeNetList, ComputeNodeRoles)
+from graphpype.nodes.modularity import (ComputeNetList, ComputeNodeRoles,
+                                        ComputeModuleGraphProp)
 
 try:
     import neuropycon_data as nd
 
 except ImportError:
     print("neuropycon_data not installed")
+    exit()
 
 
 data_path = os.path.join(nd.__path__[0], "data", "data_con")
@@ -50,3 +52,19 @@ def test_compute_node_roles():
     os.remove(val.node_roles_file)
     os.remove(val.all_Z_com_degree_file)
     os.remove(val.all_participation_coeff_file)
+
+
+def test_compute_module_graph_prop():
+    """ test ComputeModuleGraphProp"""
+    compute_module_graph_prop = ComputeModuleGraphProp(corres = False)
+    compute_module_graph_prop.inputs.rada_lol_file = lol_file
+    compute_module_graph_prop.inputs.Pajek_net_file = Pajek_net_file
+
+    val = compute_module_graph_prop.run().outputs
+    print(val)
+
+    assert os.path.exists(val.df_neg_file)
+    assert os.path.exists(val.df_pos_file)
+    assert os.path.exists(val.df_mod_file)
+
+test_compute_module_graph_prop()

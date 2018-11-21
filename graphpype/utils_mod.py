@@ -458,6 +458,9 @@ def compute_roles(community_vect, sparse_mat, role_type="Amaral_roles"):
     return node_roles, Z_com_deg, parti_coef
 
 
+# modules and intermodules computation
+
+
 def _inter_module_mat(bip_mat, community_vect):
     """
     intermodules computation
@@ -490,65 +493,23 @@ def _inter_module_mat(bip_mat, community_vect):
             pos_nb_edges[i, j] = np.sum(mod_mat == 1)
             neg_nb_edges[i, j] = np.sum(mod_mat == -1)
 
-    return pos_nb_edges, neg_nb_edges
-
-
-def count_inter_module_density(rada_lol_file, Pajek_net_file, corres=True,
-                               export_excel=True):
-
-    community_vect = read_lol_file(rada_lol_file)
-    corres_nodes, sparse_mat = \
-        read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
-
-    if corres:
-        dense_mat = sparse_mat.todense()
-        corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
-        bip_mat = np.sign(corres_mat)
-
-    else:
-        bip_mat = np.sign(sparse_mat.todense())
-
-    bip_mat = bip_mat + np.transpose(bip_mat)
-
-    pos_nb_edges, neg_nb_edges = \
-        _inter_module_mat(bip_mat, community_vect)
 
     mod_labels = ["module_"+str(i) for i in np.unique(community_vect)]
 
     df_pos = pd.DataFrame(pos_nb_edges, columns=mod_labels)
     df_neg = pd.DataFrame(neg_nb_edges, columns=mod_labels)
 
-    df_pos.to_csv("pos_nb_edges.csv")
-    df_neg.to_csv("neg_nb_edges.csv")
-
-    if export_excel:
-
-        try:
-            import xlwt # noqa
-            df_pos.to_excel("pos_nb_edges.xls")
-            df_neg.to_excel("neg_nb_edges.xls")
-
-        except ImportError:
-            print("Error, xlwt is not installed, cannot export Excel file")
+    return df_pos, df_neg
 
 
-def count_modules_density(rada_lol_file, Pajek_net_file, export_excel=True,
-                          corres=True):
-
-    # community_vect
-    community_vect = read_lol_file(rada_lol_file)
-
-    # corres_nodes
-    corres_nodes, sparse_mat = \
-        read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
-
-    if corres:
-        dense_mat = sparse_mat.todense()
-        corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
-        bip_mat = np.sign(corres_mat)
-
-    else:
-        bip_mat = np.sign(sparse_mat.todense())
+def _module_mat(bip_mat,community_vect):
+    """
+    module computation
+    """
+    
+    assert bip_mat.shape[0] == community_vect.shape[0], \
+        ("Error, mat {}!= community_vect {}".format(
+            bip_mat.shape[0], community_vect.shape[0]))
 
     res_mod = []
     for index_mod in np.unique(community_vect):
@@ -575,12 +536,4 @@ def count_modules_density(rada_lol_file, Pajek_net_file, export_excel=True,
                       columns=["index_mod", "nb_nodes", "nb_edges",
                                "nb_pos_edges", "nb_neg_edges", "den_edges",
                                "den_pos_edges", "den_neg_edges"])
-    df.to_csv("res_mod.csv")
-
-    if export_excel:
-        try:
-            import xlwt # noqa
-            df.to_excel("res_mod.xls")
-
-        except ImportError:
-            print("Error, xlwt is not installed, cannot export Excel file")
+    return df

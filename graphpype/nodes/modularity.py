@@ -11,7 +11,8 @@ from graphpype.utils_net import (return_net_list, return_int_net_list,
                                  export_List_net_from_list)
 
 from graphpype.utils_net import read_Pajek_corres_nodes_and_sparse_matrix
-from graphpype.utils_mod import compute_roles, read_lol_file
+from graphpype.utils_mod import (compute_roles, read_lol_file, 
+                                 _inter_module_mat, _module_mat)
 
 # ComputeNetList
 
@@ -457,3 +458,179 @@ class ComputeNodeRoles(BaseInterface):
 
         return outputs
 
+
+
+# ComputeModuleGraphProp
+
+
+class ComputeModuleGraphPropInputSpec(BaseInterfaceInputSpec):
+
+    rada_lol_file = File(
+        exists=True,
+        desc='lol file, describing modular structure of the network',
+        mandatory=True)
+
+    Pajek_net_file = File(
+        exists=True,
+        desc='net description in Pajek format', mandatory=True)
+    
+    export_excel = traits.Bool(
+        False, desc="export data as xls (as well as csv)",
+        usedefault=True)
+
+    corres = traits.Bool(
+        False, desc=("use corres between nodes or matrix and community_vect \
+            already compatible"),
+        usedefault=True)
+
+class ComputeModuleGraphPropOutputSpec(TraitedSpec):
+
+    df_neg_file = File(
+        exists=True, 
+        desc="number of negative edges between modules")
+
+    df_pos_file = File(
+        exists=True, 
+        desc="number of positive edges between modules")
+
+    df_mod_file = File(
+        exists=True,
+        desc="module properties")
+
+    df_neg_excel_file = File(
+        desc="number of negative edges between modules in xls format")
+
+    df_pos_excel_file = File(
+        desc="number of positive edges between modules in xls format")
+
+    df_mod_excel_file = File(
+        desc="module properties in xls format")
+
+
+class ComputeModuleGraphProp(BaseInterface):
+
+    """
+    Description:
+
+    Compute module and intermodule properties from graph
+    
+    Inputs:
+
+        rada_lol_file:
+            type = File, exists=True,
+            desc='lol file, describing modular structure of the network',
+            mandatory=True
+
+
+        Pajek_net_file:
+            type = File, exists=True, desc='net description in Pajek format',
+            mandatory=True
+
+    Outputs:
+
+    df_neg_file:
+        type = File
+        exists=True, 
+        desc="number of negative edges between modules"
+
+    df_pos_file:
+        type = File, 
+        exists=True, 
+        desc="number of positive edges between modules"
+
+    df_mod_file:
+        type = File,
+        exists=True,
+        desc="module properties"
+
+    optional if export_excel:
+
+    df_neg_excel_file:
+        type = File
+        desc="number of negative edges between modules in xls format"
+
+    df_pos_excel_file:
+        type = File
+        desc="number of positive edges between modules in xls format"
+
+    df_mod_excel_file:
+        type = File
+        desc="module properties in xls format"
+
+    """
+    input_spec = ComputeModuleGraphPropInputSpec
+    output_spec = ComputeModuleGraphPropOutputSpec
+
+    def _run_interface(self, runtime):
+
+        rada_lol_file = self.inputs.rada_lol_file
+        Pajek_net_file = self.inputs.Pajek_net_file
+        corres = self.inputs.corres
+        export_excel = self.inputs.export_excel
+
+
+        community_vect = read_lol_file(rada_lol_file)
+        corres_nodes, sparse_mat = \
+            read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
+
+        if corres:
+            dense_mat = sparse_mat.todense()
+            corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
+            bip_mat = np.sign(corres_mat)
+
+        else:
+            bip_mat = np.sign(sparse_mat.todense())
+
+        # module
+        df_mod_file = os.path.abspath("res_mod.csv")
+        df_mod = _module_mat(bip_mat, community_vect)
+        df_mod.to_csv(df_mod_file)
+        
+        # intermodule
+        bip_mat = bip_mat + np.transpose(bip_mat)
+
+        df_pos, df_neg = \
+            _inter_module_mat(bip_mat, community_vect)
+
+        df_pos_file = os.path.abspath("pos_nb_edges.csv")
+        df_neg_file = os.path.abspath("neg_nb_edges.csv")
+        
+        df_pos.to_csv(df_pos_file)
+        df_neg.to_csv(df_neg_file)
+        
+
+        if export_excel:
+                
+            df_pos_excel_file = os.path.abspath("pos_nb_edges.xls")
+            df_neg_excel_file = os.path.abspath("neg_nb_edges.xls")
+            
+            df_mod_excel_file = os.path.abspath("res_mod.xls")
+            
+            try:
+                import xlwt # noqa
+                df_pos.to_excel(df_pos_excel_file)
+                df_neg.to_excel(df_neg_excel_file)
+
+                df_mod.to_excel(df_mod_excel_file)
+                
+            except ImportError:
+                print("Error, xlwt is not installed, cannot export Excel file")
+                
+        return runtime
+
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        
+    
+        outputs["df_pos_file"] = os.path.abspath("pos_nb_edges.csv")
+        outputs["df_neg_file"] = os.path.abspath("neg_nb_edges.csv")
+        outputs["df_mod_file"] = os.path.abspath("res_mod.csv")
+        
+        if self.inputs.export_excel:
+            outputs["df_pos_excel_file"] = os.path.abspath("pos_nb_edges.xls")
+            outputs["df_neg_excel_file"] = os.path.abspath("neg_nb_edges.xls")
+            outputs["df_mod_excel_file"] = os.path.abspath("res_mod.xls")
+                
+
+        return outputs
