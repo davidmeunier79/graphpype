@@ -5,17 +5,11 @@ Author:
 """
 import pandas as pd
 import numpy as np
-
 from pandas.io.parsers import read_csv
-
 import itertools as iter
 
-# from graphpype.utils_net import read_lol_file
-from graphpype.utils_net import read_Pajek_corres_nodes_and_sparse_matrix
 
 # from lol_file
-
-
 def get_modularity_value_from_lol_file(lol_file):
     """get_modularity_value_from_lol_file"""
     with open(lol_file, 'r') as f:
@@ -28,10 +22,9 @@ def get_modularity_value_from_lol_file(lol_file):
         print("Unable to find modularity line in file, returning -1")
         return -1.0
 
+
 # reading info files
 # from info-nodes
-
-
 def get_max_degree_from_node_info_file(info_nodes_file):
     """Return max degree AND index and name of max degree (radatools based)"""
     df = pd.read_table(info_nodes_file)
@@ -255,24 +248,16 @@ def get_path_length_from_info_dists_file(info_dists_file):
 def read_lol_file(lol_file):
     """Formatting data for community detection algorithm radatools"""
     with open(lol_file, 'r') as f:
-
         lines = f.readlines()[4:]
-
         nb_elements = int(lines[0].split(': ')[1])
-
         community_vect = np.empty((nb_elements), dtype=int)
 
         for i, line in enumerate(lines[3:]):
-
             try:
                 nb_nodes, index_nodes = line.split(': ')
-                print(nb_nodes, index_nodes)
-
                 if int(nb_nodes) > 1:
                     index_nodes = np.array(
                         list(map(int, index_nodes.split(' '))), dtype=int) - 1
-
-                    # print i,index_nodes
                     community_vect[index_nodes] = i
 
                 else:
@@ -281,14 +266,10 @@ def read_lol_file(lol_file):
             except ValueError:
                 print("Warning, error reading lol file ")
 
-        f.close()
-
     return community_vect
 
 
 # compute modular matrix from sparse matrix and community vect
-
-
 def compute_modular_matrix(sp_mat, community_vect):
 
     mod_mat = np.empty(sp_mat.todense().shape)
@@ -458,129 +439,34 @@ def compute_roles(community_vect, sparse_mat, role_type="Amaral_roles"):
     return node_roles, Z_com_deg, parti_coef
 
 
-def _inter_module_mat(bip_mat, community_vect):
+# modules and intermodules computation
+def _inter_module_avgmat(con_mat, community_vect):
     """
     intermodules computation
     """
-    assert bip_mat.shape[0] == community_vect.shape[0], \
+    assert con_mat.shape[0] == community_vect.shape[0], \
         ("Error, mat {}!= community_vect {}".format(
-            bip_mat.shape[0], community_vect.shape[0]))
+            con_mat.shape[0], community_vect.shape[0]))
 
     index_mod = np.unique(community_vect)
     nb_mod = index_mod.shape[0]
 
-    pos_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
-    neg_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
+    avgmat = np.zeros(shape=(nb_mod, nb_mod))
 
     for i, j in iter.product(index_mod, repeat=2):
-
         ind_i = np.where(community_vect == i)
         ind_j = np.where(community_vect == j)
-
-        mod_mat = bip_mat[ind_i[0], :][:, ind_j[0]]
+        mod_mat = con_mat[ind_i[0], :][:, ind_j[0]]
 
         if i == j:
             triu = np.triu_indices(mod_mat.shape[0], k=1)
-
             tri_mod_mat = mod_mat[triu[0], triu[1]]
-            pos_nb_edges[i, j] = np.sum(tri_mod_mat == 1)
-            neg_nb_edges[i, j] = np.sum(tri_mod_mat == -1)
+            if tri_mod_mat.shape[0]:
+                avgmat[i, j] = np.mean(tri_mod_mat)
         else:
 
-            pos_nb_edges[i, j] = np.sum(mod_mat == 1)
-            neg_nb_edges[i, j] = np.sum(mod_mat == -1)
-
-    return pos_nb_edges, neg_nb_edges
-
-
-def count_inter_module_density(rada_lol_file, Pajek_net_file, corres=True,
-                               export_excel=True):
-
-    community_vect = read_lol_file(rada_lol_file)
-    corres_nodes, sparse_mat = \
-        read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
-
-    if corres:
-        dense_mat = sparse_mat.todense()
-        corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
-        bip_mat = np.sign(corres_mat)
-
-    else:
-        bip_mat = np.sign(sparse_mat.todense())
-
-    bip_mat = bip_mat + np.transpose(bip_mat)
-
-    pos_nb_edges, neg_nb_edges = \
-        _inter_module_mat(bip_mat, community_vect)
+            avgmat[i, j] = np.mean(mod_mat)
 
     mod_labels = ["module_"+str(i) for i in np.unique(community_vect)]
-
-    df_pos = pd.DataFrame(pos_nb_edges, columns=mod_labels)
-    df_neg = pd.DataFrame(neg_nb_edges, columns=mod_labels)
-
-    df_pos.to_csv("pos_nb_edges.csv")
-    df_neg.to_csv("neg_nb_edges.csv")
-
-    if export_excel:
-
-        try:
-            import xlwt # noqa
-            df_pos.to_excel("pos_nb_edges.xls")
-            df_neg.to_excel("neg_nb_edges.xls")
-
-        except ImportError:
-            print("Error, xlwt is not installed, cannot export Excel file")
-
-
-def count_modules_density(rada_lol_file, Pajek_net_file, export_excel=True,
-                          corres=True):
-
-    # community_vect
-    community_vect = read_lol_file(rada_lol_file)
-
-    # corres_nodes
-    corres_nodes, sparse_mat = \
-        read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
-
-    if corres:
-        dense_mat = sparse_mat.todense()
-        corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
-        bip_mat = np.sign(corres_mat)
-
-    else:
-        bip_mat = np.sign(sparse_mat.todense())
-
-    res_mod = []
-    for index_mod in np.unique(community_vect):
-
-        mod_nodes, = np.where(community_vect == index_mod)
-        mod_mat = bip_mat[:, mod_nodes][mod_nodes, :]
-
-        nb_pos_edges = np.sum(mod_mat == 1)
-        nb_neg_edges = np.sum(mod_mat == -1)
-
-        nb_nodes = mod_nodes.shape[0]
-        nb_edges = nb_nodes*(nb_nodes-1)/2
-
-        if nb_edges:
-            den_edges = (nb_neg_edges+nb_pos_edges)/float(nb_edges)
-            den_pos_edges = nb_pos_edges/float(nb_edges)
-            den_neg_edges = nb_neg_edges/float(nb_edges)
-
-            res_mod.append((index_mod, nb_nodes, nb_edges, nb_pos_edges,
-                            nb_neg_edges, den_edges, den_pos_edges,
-                            den_neg_edges))
-
-    df = pd.DataFrame(res_mod,
-                      columns=["index_mod", "nb_nodes", "nb_edges",
-                               "nb_pos_edges", "nb_neg_edges", "den_edges",
-                               "den_pos_edges", "den_neg_edges"])
-    df.to_csv("res_mod.csv")
-
-    if export_excel:
-        try:
-            import xlwt # noqa
-            df.to_excel("res_mod.xls")
-
-        except ImportError:
-            print("Error, xlwt is not installed, cannot export Excel file")
+    df_avgmat = pd.DataFrame(avgmat, columns=mod_labels)
+    return df_avgmat

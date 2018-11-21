@@ -1,5 +1,5 @@
-
 import os
+import shutil
 
 """
 from graphpype.pipelines.nii_to_conmat import (
@@ -7,11 +7,21 @@ from graphpype.pipelines.nii_to_conmat import (
     create_pipeline_nii_to_conmat_seg_template,
     create_pipeline_nii_to_subj_ROI, create_pipeline_nii_to_conmat)
 """
+from graphpype.pipelines.nii_to_conmat import create_pipeline_nii_to_conmat
 
 try:
     import neuropycon_data as nd
 except ImportError:
     print("Warning, neuropycon_data not found")
+    exit()
+
+
+tmp_dir = "/tmp/test_graphpype"
+if os.path.exists(tmp_dir):
+    shutil.rmtree(tmp_dir)
+
+os.makedirs(tmp_dir)
+#os.chdir(tmp_dir)
 
 data_path = os.path.join(nd.__path__[0], "data", "data_nii")
 
@@ -84,20 +94,20 @@ def test_create_pipeline_nii_to_conmat_seg_template():
 # test = if gm_anat_file = wm_anat_file,
 # crashes because BOLD signal is not enough!
 
-# def test_create_pipeline_nii_to_subj_ROI():
+def test_create_pipeline_nii_to_subj_ROI():
 
-    #wf = create_pipeline_nii_to_subj_ROI(main_path = data_path,
+    wf = create_pipeline_nii_to_subj_ROI(main_path = data_path,
         pipeline_name = "nii_to_conmat_seg_template")
 
-    #wf.inputs.inputnode.nii_4D_file = nii_4D_file
-    #wf.inputs.inputnode.ROI_mask_file = indexed_mask_file
+    wf.inputs.inputnode.nii_4D_file = nii_4D_file
+    wf.inputs.inputnode.ROI_mask_file = indexed_mask_file
 
-    #wf.inputs.inputnode.gm_anat_file = wm_anat_file
+    wf.inputs.inputnode.gm_anat_file = wm_anat_file
 
-    # Warning, is necessary, otherwise Figures are removed!
-    #wf.config['execution'] = {"remove_unnecessary_outputs":False}
+    #Warning, is necessary, otherwise Figures are removed!
+    wf.config['execution'] = {"remove_unnecessary_outputs":False}
 
-    # wf.run()
+    wf.run()
 
 # subject time series only (no regression of wm and csf signals /
 # no correlation matrices)
@@ -121,14 +131,15 @@ def test_create_pipeline_nii_to_subj_ROI():
     wf.config['execution'] = {"remove_unnecessary_outputs": False}
 
     wf.run()
+"""
+
 
 # the full pipeline
 
 
 def test_create_pipeline_nii_to_conmat():
-
     wf = create_pipeline_nii_to_conmat(
-        main_path=data_path, pipeline_name="nii_to_conmat_full")
+        main_path=tmp_dir, pipeline_name="nii_to_conmat_full")
 
     wf.inputs.inputnode.nii_4D_file = nii_4D_file
     wf.inputs.inputnode.ROI_mask_file = indexed_mask_file
@@ -145,4 +156,5 @@ def test_create_pipeline_nii_to_conmat():
     wf.config['execution'] = {"remove_unnecessary_outputs": False}
 
     wf.run()
-"""
+
+test_create_pipeline_nii_to_conmat()
