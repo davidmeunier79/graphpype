@@ -266,7 +266,6 @@ def read_lol_file(lol_file):
 
             try:
                 nb_nodes, index_nodes = line.split(': ')
-                print(nb_nodes, index_nodes)
 
                 if int(nb_nodes) > 1:
                     index_nodes = np.array(
@@ -280,9 +279,7 @@ def read_lol_file(lol_file):
 
             except ValueError:
                 print("Warning, error reading lol file ")
-
-        f.close()
-
+                
     return community_vect
 
 

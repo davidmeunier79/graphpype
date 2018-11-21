@@ -582,55 +582,46 @@ class ComputeModuleGraphProp(BaseInterface):
             bip_mat = np.sign(sparse_mat.todense())
 
         # module
-        df_mod_file = os.path.abspath("res_mod.csv")
         df_mod = _module_mat(bip_mat, community_vect)
+        df_mod_file = os.path.abspath("res_mod.csv")
         df_mod.to_csv(df_mod_file)
-        
+
         # intermodule
         bip_mat = bip_mat + np.transpose(bip_mat)
-
-        df_pos, df_neg = \
-            _inter_module_mat(bip_mat, community_vect)
+        df_pos, df_neg = _inter_module_mat(bip_mat, community_vect)
 
         df_pos_file = os.path.abspath("pos_nb_edges.csv")
         df_neg_file = os.path.abspath("neg_nb_edges.csv")
-        
+
         df_pos.to_csv(df_pos_file)
         df_neg.to_csv(df_neg_file)
-        
 
         if export_excel:
-                
-            df_pos_excel_file = os.path.abspath("pos_nb_edges.xls")
-            df_neg_excel_file = os.path.abspath("neg_nb_edges.xls")
-            
-            df_mod_excel_file = os.path.abspath("res_mod.xls")
-            
             try:
                 import xlwt # noqa
+                df_pos_excel_file = os.path.abspath("pos_nb_edges.xls")
+                df_neg_excel_file = os.path.abspath("neg_nb_edges.xls")
+                df_mod_excel_file = os.path.abspath("res_mod.xls")
+
                 df_pos.to_excel(df_pos_excel_file)
                 df_neg.to_excel(df_neg_excel_file)
-
                 df_mod.to_excel(df_mod_excel_file)
-                
+
             except ImportError:
                 print("Error, xlwt is not installed, cannot export Excel file")
-                
+
         return runtime
 
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        
-    
         outputs["df_pos_file"] = os.path.abspath("pos_nb_edges.csv")
         outputs["df_neg_file"] = os.path.abspath("neg_nb_edges.csv")
         outputs["df_mod_file"] = os.path.abspath("res_mod.csv")
-        
+
         if self.inputs.export_excel:
             outputs["df_pos_excel_file"] = os.path.abspath("pos_nb_edges.xls")
             outputs["df_neg_excel_file"] = os.path.abspath("neg_nb_edges.xls")
             outputs["df_mod_excel_file"] = os.path.abspath("res_mod.xls")
-                
 
         return outputs
