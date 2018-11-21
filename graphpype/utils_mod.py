@@ -458,79 +458,115 @@ def compute_roles(community_vect, sparse_mat, role_type="Amaral_roles"):
 # modules and intermodules computation
 
 
-def _inter_module_mat(bip_mat, community_vect):
+
+def _inter_module_avgmat(con_mat, community_vect):
     """
     intermodules computation
     """
-    assert bip_mat.shape[0] == community_vect.shape[0], \
+    assert con_mat.shape[0] == community_vect.shape[0], \
         ("Error, mat {}!= community_vect {}".format(
-            bip_mat.shape[0], community_vect.shape[0]))
+            con_mat.shape[0], community_vect.shape[0]))
 
     index_mod = np.unique(community_vect)
     nb_mod = index_mod.shape[0]
 
-    pos_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
-    neg_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
+    avgmat = np.zeros(shape=(nb_mod, nb_mod))
 
     for i, j in iter.product(index_mod, repeat=2):
 
         ind_i = np.where(community_vect == i)
         ind_j = np.where(community_vect == j)
 
-        mod_mat = bip_mat[ind_i[0], :][:, ind_j[0]]
+        mod_mat = con_mat[ind_i[0], :][:, ind_j[0]]
 
         if i == j:
             triu = np.triu_indices(mod_mat.shape[0], k=1)
 
             tri_mod_mat = mod_mat[triu[0], triu[1]]
-            pos_nb_edges[i, j] = np.sum(tri_mod_mat == 1)
-            neg_nb_edges[i, j] = np.sum(tri_mod_mat == -1)
+            avgmat[i, j] = np.mean(tri_mod_mat)
         else:
 
-            pos_nb_edges[i, j] = np.sum(mod_mat == 1)
-            neg_nb_edges[i, j] = np.sum(mod_mat == -1)
+            avgmat[i, j] = np.mean(mod_mat)
 
 
     mod_labels = ["module_"+str(i) for i in np.unique(community_vect)]
 
-    df_pos = pd.DataFrame(pos_nb_edges, columns=mod_labels)
-    df_neg = pd.DataFrame(neg_nb_edges, columns=mod_labels)
+    df_avgmat = pd.DataFrame(avgmat, columns=mod_labels)
 
-    return df_pos, df_neg
+    return df_avgmat
+
+#def _inter_module_mat(bip_mat, community_vect):
+    #"""
+    #intermodules computation
+    #"""
+    #assert bip_mat.shape[0] == community_vect.shape[0], \
+        #("Error, mat {}!= community_vect {}".format(
+            #bip_mat.shape[0], community_vect.shape[0]))
+
+    #index_mod = np.unique(community_vect)
+    #nb_mod = index_mod.shape[0]
+
+    #pos_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
+    #neg_nb_edges = np.zeros(shape=(nb_mod, nb_mod))
+
+    #for i, j in iter.product(index_mod, repeat=2):
+
+        #ind_i = np.where(community_vect == i)
+        #ind_j = np.where(community_vect == j)
+
+        #mod_mat = bip_mat[ind_i[0], :][:, ind_j[0]]
+
+        #if i == j:
+            #triu = np.triu_indices(mod_mat.shape[0], k=1)
+
+            #tri_mod_mat = mod_mat[triu[0], triu[1]]
+            #pos_nb_edges[i, j] = np.sum(tri_mod_mat == 1)
+            #neg_nb_edges[i, j] = np.sum(tri_mod_mat == -1)
+        #else:
+
+            #pos_nb_edges[i, j] = np.sum(mod_mat == 1)
+            #neg_nb_edges[i, j] = np.sum(mod_mat == -1)
 
 
-def _module_mat(bip_mat,community_vect):
-    """
-    module computation
-    """
+    #mod_labels = ["module_"+str(i) for i in np.unique(community_vect)]
+
+    #df_pos = pd.DataFrame(pos_nb_edges, columns=mod_labels)
+    #df_neg = pd.DataFrame(neg_nb_edges, columns=mod_labels)
+
+    #return df_pos, df_neg
+
+#def _module_mat(bip_mat,community_vect):
+    #"""
+    #module computation
+    #"""
     
-    assert bip_mat.shape[0] == community_vect.shape[0], \
-        ("Error, mat {}!= community_vect {}".format(
-            bip_mat.shape[0], community_vect.shape[0]))
+    #assert bip_mat.shape[0] == community_vect.shape[0], \
+        #("Error, mat {}!= community_vect {}".format(
+            #bip_mat.shape[0], community_vect.shape[0]))
 
-    res_mod = []
-    for index_mod in np.unique(community_vect):
+    #res_mod = []
+    #for index_mod in np.unique(community_vect):
 
-        mod_nodes, = np.where(community_vect == index_mod)
-        mod_mat = bip_mat[:, mod_nodes][mod_nodes, :]
+        #mod_nodes, = np.where(community_vect == index_mod)
+        #mod_mat = bip_mat[:, mod_nodes][mod_nodes, :]
 
-        nb_pos_edges = np.sum(mod_mat == 1)
-        nb_neg_edges = np.sum(mod_mat == -1)
+        #nb_pos_edges = np.sum(mod_mat == 1)
+        #nb_neg_edges = np.sum(mod_mat == -1)
 
-        nb_nodes = mod_nodes.shape[0]
-        nb_edges = nb_nodes*(nb_nodes-1)/2
+        #nb_nodes = mod_nodes.shape[0]
+        #nb_edges = nb_nodes*(nb_nodes-1)/2
 
-        if nb_edges:
-            den_edges = (nb_neg_edges+nb_pos_edges)/float(nb_edges)
-            den_pos_edges = nb_pos_edges/float(nb_edges)
-            den_neg_edges = nb_neg_edges/float(nb_edges)
+        #if nb_edges:
+            #den_edges = (nb_neg_edges+nb_pos_edges)/float(nb_edges)
+            #den_pos_edges = nb_pos_edges/float(nb_edges)
+            #den_neg_edges = nb_neg_edges/float(nb_edges)
 
-            res_mod.append((index_mod, nb_nodes, nb_edges, nb_pos_edges,
-                            nb_neg_edges, den_edges, den_pos_edges,
-                            den_neg_edges))
+            #res_mod.append((index_mod, nb_nodes, nb_edges, nb_pos_edges,
+                            #nb_neg_edges, den_edges, den_pos_edges,
+                            #den_neg_edges))
 
-    df = pd.DataFrame(res_mod,
-                      columns=["index_mod", "nb_nodes", "nb_edges",
-                               "nb_pos_edges", "nb_neg_edges", "den_edges",
-                               "den_pos_edges", "den_neg_edges"])
-    return df
+    #df = pd.DataFrame(res_mod,
+                      #columns=["index_mod", "nb_nodes", "nb_edges",
+                               #"nb_pos_edges", "nb_neg_edges", "den_edges",
+                               #"den_pos_edges", "den_neg_edges"])
+    #return df

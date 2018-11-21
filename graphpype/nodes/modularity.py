@@ -11,8 +11,8 @@ from graphpype.utils_net import (return_net_list, return_int_net_list,
                                  export_List_net_from_list)
 
 from graphpype.utils_net import read_Pajek_corres_nodes_and_sparse_matrix
-from graphpype.utils_mod import (compute_roles, read_lol_file, 
-                                 _inter_module_mat, _module_mat)
+from graphpype.utils_mod import (compute_roles, read_lol_file,
+                                 _inter_module_avgmat)
 
 # ComputeNetList
 
@@ -460,10 +460,10 @@ class ComputeNodeRoles(BaseInterface):
 
 
 
-# ComputeModuleGraphProp
+# ComputeModuleMatProp
 
 
-class ComputeModuleGraphPropInputSpec(BaseInterfaceInputSpec):
+class ComputeModuleMatPropInputSpec(BaseInterfaceInputSpec):
 
     rada_lol_file = File(
         exists=True,
@@ -473,46 +473,41 @@ class ComputeModuleGraphPropInputSpec(BaseInterfaceInputSpec):
     Pajek_net_file = File(
         exists=True,
         desc='net description in Pajek format', mandatory=True)
+
+    conmat_file = File(
+        exists=True,
+        desc='full matrix in npy format', mandatory=True)
     
     export_excel = traits.Bool(
         False, desc="export data as xls (as well as csv)",
         usedefault=True)
 
-    corres = traits.Bool(
-        False, desc=("use corres between nodes or matrix and community_vect \
-            already compatible"),
-        usedefault=True)
+class ComputeModuleMatPropOutputSpec(TraitedSpec):
 
-class ComputeModuleGraphPropOutputSpec(TraitedSpec):
-
-    df_neg_file = File(
-        exists=True, 
-        desc="number of negative edges between modules")
-
-    df_pos_file = File(
-        exists=True, 
-        desc="number of positive edges between modules")
-
-    df_mod_file = File(
+    df_avgmat_file = File(
         exists=True,
         desc="module properties")
 
-    df_neg_excel_file = File(
-        desc="number of negative edges between modules in xls format")
-
-    df_pos_excel_file = File(
-        desc="number of positive edges between modules in xls format")
-
-    df_mod_excel_file = File(
+    df_avgmat_excel_file = File(
         desc="module properties in xls format")
 
+def _is_symetrical(mat):
 
-class ComputeModuleGraphProp(BaseInterface):
+    triu_mat = mat[np.triu_indices(mat.shape[0], k=1)]
+    tril_mat = mat[np.tril_indices(mat.shape[0], k=-1)]
+    
+    print(triu_mat)
+    print(tril_mat)
+    
+    return np.all(triu_mat == tril_mat)
+    
+    
+class ComputeModuleMatProp(BaseInterface):
 
     """
     Description:
 
-    Compute module and intermodule properties from graph
+    Compute module and intermodule properties from Mat
     
     Inputs:
 
@@ -521,51 +516,41 @@ class ComputeModuleGraphProp(BaseInterface):
             desc='lol file, describing modular structure of the network',
             mandatory=True
 
+        conmat_file:
+            #type = File, exists=True, desc='full matrix in npy format',
+            #mandatory=True
 
         Pajek_net_file:
             type = File, exists=True, desc='net description in Pajek format',
             mandatory=True
 
+        export_excel:
+            type = File
+            
+        corres:
+
     Outputs:
 
-    df_neg_file:
-        type = File
-        exists=True, 
-        desc="number of negative edges between modules"
-
-    df_pos_file:
-        type = File, 
-        exists=True, 
-        desc="number of positive edges between modules"
-
-    df_mod_file:
+    df_avgmat_file:
         type = File,
         exists=True,
         desc="module properties"
 
     optional if export_excel:
 
-    df_neg_excel_file:
-        type = File
-        desc="number of negative edges between modules in xls format"
-
-    df_pos_excel_file:
-        type = File
-        desc="number of positive edges between modules in xls format"
-
-    df_mod_excel_file:
+    df_avgmat_excel_file:
         type = File
         desc="module properties in xls format"
 
     """
-    input_spec = ComputeModuleGraphPropInputSpec
-    output_spec = ComputeModuleGraphPropOutputSpec
+    input_spec = ComputeModuleMatPropInputSpec
+    output_spec = ComputeModuleMatPropOutputSpec
 
     def _run_interface(self, runtime):
 
         rada_lol_file = self.inputs.rada_lol_file
         Pajek_net_file = self.inputs.Pajek_net_file
-        corres = self.inputs.corres
+        conmat_file = self.inputs.conmat_file
         export_excel = self.inputs.export_excel
 
 
@@ -573,55 +558,146 @@ class ComputeModuleGraphProp(BaseInterface):
         corres_nodes, sparse_mat = \
             read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
 
-        if corres:
-            dense_mat = sparse_mat.todense()
-            corres_mat = dense_mat[:, corres_nodes][corres_nodes, :]
-            bip_mat = np.sign(corres_mat)
+    
 
-        else:
-            bip_mat = np.sign(sparse_mat.todense())
+        # density
+        conmat = np.load(conmat_file)
+        corres_mat = conmat[:, corres_nodes][corres_nodes, :]
 
-        # module
-        df_mod = _module_mat(bip_mat, community_vect)
-        df_mod_file = os.path.abspath("res_mod.csv")
-        df_mod.to_csv(df_mod_file)
-
-        # intermodule
-        bip_mat = bip_mat + np.transpose(bip_mat)
-        df_pos, df_neg = _inter_module_mat(bip_mat, community_vect)
-
-        df_pos_file = os.path.abspath("pos_nb_edges.csv")
-        df_neg_file = os.path.abspath("neg_nb_edges.csv")
-
-        df_pos.to_csv(df_pos_file)
-        df_neg.to_csv(df_neg_file)
+        ## intermodule
+        if not _is_symetrical(corres_mat):
+            corres_mat = corres_mat + np.transpose(corres_mat)
+        
+        df_avgmat = _inter_module_avgmat(corres_mat, community_vect)
+        df_avgmat_file = os.path.abspath("res_avgmat.csv")
+        df_avgmat.to_csv(df_avgmat_file)
 
         if export_excel:
             try:
                 import xlwt # noqa
-                df_pos_excel_file = os.path.abspath("pos_nb_edges.xls")
-                df_neg_excel_file = os.path.abspath("neg_nb_edges.xls")
-                df_mod_excel_file = os.path.abspath("res_mod.xls")
-
-                df_pos.to_excel(df_pos_excel_file)
-                df_neg.to_excel(df_neg_excel_file)
-                df_mod.to_excel(df_mod_excel_file)
+                df_avgmat_excel_file = os.path.abspath("res_avgmat.xls")
+                df_avgmat.to_excel(df_avgmat_excel_file)
 
             except ImportError:
-                print("Error, xlwt is not installed, cannot export Excel file")
+                print("Error, xlwt not installed, cannot export Excel file")
 
         return runtime
 
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["df_pos_file"] = os.path.abspath("pos_nb_edges.csv")
-        outputs["df_neg_file"] = os.path.abspath("neg_nb_edges.csv")
-        outputs["df_mod_file"] = os.path.abspath("res_mod.csv")
+        outputs["df_avgmat_file"] = os.path.abspath("res_avgmat.csv")
 
         if self.inputs.export_excel:
-            outputs["df_pos_excel_file"] = os.path.abspath("pos_nb_edges.xls")
-            outputs["df_neg_excel_file"] = os.path.abspath("neg_nb_edges.xls")
-            outputs["df_mod_excel_file"] = os.path.abspath("res_mod.xls")
+            outputs["df_avgmat_excel_file"] = os.path.abspath("res_avgmat.xls")
 
         return outputs
+
+
+# ComputeModuleGraphProp
+
+
+#class ComputeModuleGraphPropInputSpec(BaseInterfaceInputSpec):
+
+    #rada_lol_file = File(
+        #exists=True,
+        #desc='lol file, describing modular structure of the network',
+        #mandatory=True)
+
+    #Pajek_net_file = File(
+        #exists=True,
+        #desc='net description in Pajek format', mandatory=True)
+
+    #export_excel = traits.Bool(
+        #False, desc="export data as xls (as well as csv)",
+        #usedefault=True)
+
+#class ComputeModuleGraphPropOutputSpec(TraitedSpec):
+
+    #df_avgmat_file = File(
+        #exists=True,
+        #desc="module properties")
+
+    #df_avgmat_excel_file = File(
+        #desc="module properties in xls format")
+
+
+#class ComputeModuleGraphProp(BaseInterface):
+
+    #"""
+    #Description:
+
+    #Compute module and intermodule properties from graph
+    
+    #Inputs:
+
+        #rada_lol_file:
+            #type = File, exists=True,
+            #desc='lol file, describing modular structure of the network',
+            #mandatory=True
+
+
+        #Pajek_net_file:
+            #type = File, exists=True, desc='net description in Pajek format',
+            #mandatory=True
+
+    #Outputs:
+
+    #df_avgmat_file:
+        #type = File,
+        #exists=True,
+        #desc="module properties"
+
+    #optional if export_excel:
+
+    #df_avgmat_excel_file:
+        #type = File
+        #desc="module properties in xls format"
+
+    #"""
+    #input_spec = ComputeModuleGraphPropInputSpec
+    #output_spec = ComputeModuleGraphPropOutputSpec
+
+    #def _run_interface(self, runtime):
+
+        #rada_lol_file = self.inputs.rada_lol_file
+        #Pajek_net_file = self.inputs.Pajek_net_file
+        #corres = self.inputs.corres
+        #export_excel = self.inputs.export_excel
+
+
+        #community_vect = read_lol_file(rada_lol_file)
+        #corres_nodes, sparse_mat = \
+            #read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file)
+
+    
+
+        ## density
+        #conmat = np.load(conmat_file)
+        #corres_mat = conmat[:, corres_nodes][corres_nodes, :]
+
+        ### intermodule
+        #df_avgmat = _inter_module_avgmat(corres_mat, community_vect)
+        #df_avgmat_file = os.path.abspath("res_avgmat.csv")
+        #df_avgmat.to_csv(df_avgmat_file)
+
+        #if export_excel:
+            #try:
+                #import xlwt # noqa
+                #df_avgmat_excel_file = os.path.abspath("res_avgmat.xls")
+                #df_avgmat.to_excel(df_avgmat_excel_file)
+
+            #except ImportError:
+                #print("Error, xlwt is not installed, cannot export Excel file")
+
+        #return runtime
+
+
+    #def _list_outputs(self):
+        #outputs = self._outputs().get()
+        #outputs["df_avgmat_file"] = os.path.abspath("res_avgmat.csv")
+
+        #if self.inputs.export_excel:
+            #outputs["df_avgmat_excel_file"] = os.path.abspath("res_avgmat.xls")
+
+        #return outputs
