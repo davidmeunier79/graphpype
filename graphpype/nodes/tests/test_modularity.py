@@ -1,8 +1,8 @@
 import os
 import shutil
 import numpy as np
-from graphpype.nodes.modularity import (ComputeNetList, ComputeNodeRoles,
-                                        ComputeModuleMatProp, _is_symetrical)
+from graphpype.nodes.modularity import (ComputeNetList, ComputeNodeRoles)
+from graphpype.nodes.modularity import ComputeModuleMatProp
 
 try:
     import neuropycon_data as nd
@@ -15,6 +15,7 @@ except ImportError:
 data_path = os.path.join(nd.__path__[0], "data", "data_con")
 conmat_file = os.path.join(data_path, "Z_cor_mat_resid_ts.npy")
 coords_file = os.path.join(data_path, "ROI_MNI_coords-Atlas.txt")
+
 Z_list_file = os.path.join(data_path, "data_graph", "Z_List.txt")
 Pajek_net_file = os.path.join(data_path, "data_graph", "Z_List.net")
 lol_file = os.path.join(data_path, "data_graph", "Z_List.lol")
@@ -55,30 +56,16 @@ def test_compute_node_roles():
     os.remove(val.all_participation_coeff_file)
 
 
-#def test_compute_module_graph_prop():
-    #""" test ComputeModuleGraphProp"""
-    #compute_module_graph_prop = ComputeModuleGraphProp(corres = False)
-    #compute_module_graph_prop.inputs.rada_lol_file = lol_file
-    #compute_module_graph_prop.inputs.Pajek_net_file = Pajek_net_file
+def test_compute_module_mat_prop():
+    """ test ComputeModuleMatProp"""
+    compute_module_graph_prop = ComputeModuleMatProp()
+    compute_module_graph_prop.inputs.rada_lol_file = lol_file
+    compute_module_graph_prop.inputs.Pajek_net_file = Pajek_net_file
+    compute_module_graph_prop.inputs.conmat_file = conmat_file
 
-    #val = compute_module_graph_prop.run().outputs
-    #print(val)
+    val = compute_module_graph_prop.run().outputs
+    print(val)
 
-    #assert os.path.exists(val.df_neg_file)
-    #assert os.path.exists(val.df_pos_file)
-    #assert os.path.exists(val.df_mod_file)
+    assert os.path.exists(val.df_avgmat_file)
 
-#test_compute_module_graph_prop()
-
-def test_is_symetrical():
-    
-    mat = np.random.rand(2,2)
-    print(mat)
-    assert _is_symetrical(mat) == False
-    
-    mat = mat + np.transpose(mat)
-    print(mat)
-    
-    assert _is_symetrical(mat) == True
-    
-test_is_symetrical()
+test_compute_module_mat_prop()

@@ -117,3 +117,10 @@ def check_np_dimension(np_shape, np_coords):
                   {})".format(np_coords[dim], dim))
             return False
     return True
+
+def is_symetrical(mat):
+    triu_mat = mat[np.triu_indices(mat.shape[0], k=1)]
+    tril_mat = mat[np.tril_indices(mat.shape[0], k=-1)]
+
+    return np.all(triu_mat == tril_mat)
+
