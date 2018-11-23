@@ -10,15 +10,15 @@ import statsmodels.formula.api as smf
 import itertools as it
 import scipy.signal as filt
 
+from .utils import check_np_shapes
 from .utils_dtype_coord import where_in_coords
 
 
 def mean_select_mask_data(data_img, data_mask):
 
-    assert np.all(data_img.shape[:3] == data_mask.shape), ("Error, Image \
-        and mask are incompatible {} {}".format(data_img.shape,
-                                                data_mask.shape))
-
+    assert check_np_shapes(data_img.shape[:3], data_mask.shape), \
+        ("Error, Image and mask are incompatible {} {}".format(
+            data_img.shape[:3], data_mask.shape))
     masked_data_matrix = data_img[data_mask == 1, :]
 
     try:
