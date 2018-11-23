@@ -15,10 +15,18 @@ from .utils_dtype_coord import where_in_coords
 
 
 def mean_select_mask_data(data_img, data_mask):
+    """
+    extrating ts by averaging the time series of all voxels with the same
+    index
+    """
+    assert len(data_img.shape) == 4, \
+        ("Error, data_img should be a 4Dfile, shape is {}".format(
+            data_img.shape))
 
     assert check_np_shapes(data_img.shape[:3], data_mask.shape), \
         ("Error, Image and mask are incompatible {} {}".format(
             data_img.shape[:3], data_mask.shape))
+
     masked_data_matrix = data_img[data_mask == 1, :]
 
     try:
@@ -35,11 +43,18 @@ def mean_select_mask_data(data_img, data_mask):
 def mean_select_indexed_mask_data(data_img, data_indexed_mask,
                                   min_BOLD_intensity=50, percent_signal=0.5,
                                   background_val=-1.0):
-    """extrating ts by averaging the time series of all voxels with the same
-    index"""
-    assert np.all(data_img.shape[:3] == data_indexed_mask.shape), ("Error, \
-        Image and mask are incompatible {} {}".format(data_img.shape,
-                                                      data_indexed_mask.shape))
+    """
+    extrating ts by averaging the time series of all voxels with the same
+    index
+    """
+    assert len(data_img.shape) == 4, \
+        ("Error, data_img should be a 4Dfile, shape is {}".format(
+            data_img.shape))
+
+    assert check_np_shapes(data_img.shape[:3], data_mask.shape), \
+        ("Error, Image and mask are incompatible {} {}".format(
+            data_img.shape[:3], data_mask.shape))
+
     # sequence_roi_index
     sequence_roi_index = np.unique(data_indexed_mask)
 
