@@ -9,7 +9,8 @@ Author:
 """
 import random
 import numpy as np
-
+import os
+import shutil
 # fast util functions for getting first or second element (mostly in tuple)
 
 
@@ -125,3 +126,13 @@ def is_symetrical(mat):
     triu_mat = mat[np.triu_indices(mat.shape[0], k=1)]
     tril_mat = mat[np.tril_indices(mat.shape[0], k=-1)]
     return np.all(triu_mat == tril_mat)
+
+
+def _make_tmp_dir():
+    tmp_dir = "/tmp/test_graphpype"
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
+
+    os.makedirs(tmp_dir)
+    os.chdir(tmp_dir)
+    return tmp_dir

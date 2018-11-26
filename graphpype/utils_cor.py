@@ -51,9 +51,9 @@ def mean_select_indexed_mask_data(data_img, data_indexed_mask,
         ("Error, data_img should be a 4Dfile, shape is {}".format(
             data_img.shape))
 
-    assert check_np_shapes(data_img.shape[:3], data_mask.shape), \
+    assert check_np_shapes(data_img.shape[:3], data_indexed_mask.shape), \
         ("Error, Image and mask are incompatible {} {}".format(
-            data_img.shape[:3], data_mask.shape))
+            data_img.shape[:3], data_indexed_mask.shape))
 
     # sequence_roi_index
     sequence_roi_index = np.unique(data_indexed_mask)

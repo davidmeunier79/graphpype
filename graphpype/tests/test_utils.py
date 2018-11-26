@@ -85,7 +85,7 @@ def test_is_symetrical():
     """
     mat = np.random.rand(2, 2)
     print(mat)
-    assert is_symetrical(mat) is False
+    assert not is_symetrical(mat)
 
     mat = mat + np.transpose(mat)
     print(mat)

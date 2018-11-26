@@ -426,7 +426,6 @@ class ComputeModuleMatProp(BaseInterface):
         df_avgmat_file = os.path.abspath("res_avgmat.csv")
         df_avgmat.to_csv(df_avgmat_file)
 
-
         if export_excel:
             try:
                 import xlwt # noqa
