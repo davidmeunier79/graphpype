@@ -101,7 +101,8 @@ c_colval_modules = {0: "red", 1: "orange", 2: "blue", 3: "green", 4: "yellow",
 def visu_graph_modules(net_file, lol_file, coords_file, labels_file,
                        inter_modules=True, modality_type="",
                        s_textcolor="white", c_colval=c_colval_modules,
-                       umin=0, umax=50):
+                       umin=0, umax=50, x_offset = 0, y_offset = 0,
+                       z_offset = 0):
 
     # coords
     coords = np.loadtxt(coords_file)
@@ -110,9 +111,9 @@ def visu_graph_modules(net_file, lol_file, coords_file, labels_file,
         coords = 1000*coords
         temp = np.copy(coords)
 
-        coords[:,2] = coords[:,2] - 60
-        coords [:,1] = coords[:,0]
-        coords[:,0] = temp [:,1]
+        coords[:,2] = coords[:,2] + z_offset
+        coords [:,1] = coords[:,0] + y_offset
+        coords[:,0] = temp [:,1] + x_offset
 
     print (coords)
     print (coords.shape)
