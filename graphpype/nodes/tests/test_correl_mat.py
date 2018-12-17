@@ -36,6 +36,7 @@ def test_extract_ts():
 
 def test_intersect_mask():
     """test IntersectMask"""
+    # TODO _make_tmp_dir()
     intersect_mask = IntersectMask()
     intersect_mask.inputs.indexed_rois_file = indexed_mask_file
     intersect_mask.inputs.filter_mask_file = gm_mask_file

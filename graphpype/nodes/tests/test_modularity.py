@@ -34,6 +34,7 @@ def test_compute_net_list():
 def test_compute_node_roles():
     """ test ComputeNodeRoles"""
     _make_tmp_dir()
+
     compute_node_roles = ComputeNodeRoles()
     compute_node_roles.inputs.rada_lol_file = lol_file
     compute_node_roles.inputs.Pajek_net_file = Pajek_net_file
@@ -52,6 +53,7 @@ def test_compute_node_roles():
 def test_compute_module_mat_prop():
     """ test ComputeModuleMatProp"""
     _make_tmp_dir()
+
     compute_module_graph_prop = ComputeModuleMatProp()
     compute_module_graph_prop.inputs.rada_lol_file = lol_file
     compute_module_graph_prop.inputs.Pajek_net_file = Pajek_net_file

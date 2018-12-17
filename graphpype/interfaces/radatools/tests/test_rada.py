@@ -26,6 +26,7 @@ def test_radatools():
 def test_prep_rada():
     """test PrepRada"""
     _make_tmp_dir()
+
     prep_rada = PrepRada()
     prep_rada.inputs.net_List_file = Z_list_file
     prep_rada.inputs.network_type = "U"
@@ -49,10 +50,6 @@ def test_comm_rada():
     assert os.path.exists(val.rada_log_file)
     assert os.path.exists(val.lol_log_file)
 
-    # os.remove(val.rada_lol_file)
-    # os.remove(val.rada_log_file)
-    # os.remove(val.lol_log_file)
-
 
 def test_net_prop_rada():
     """test NetPropRada"""
@@ -69,10 +66,3 @@ def test_net_prop_rada():
     assert os.path.exists(val.nodes_file)
     assert os.path.exists(val.edges_betw_file)
     assert os.path.exists(val.rada_log_file)
-
-    # os.remove(val.global_file)
-    # os.remove(val.dists_file)
-    # os.remove(val.degrees_file)
-    # os.remove(val.nodes_file)
-    # os.remove(val.edges_betw_file)
-    # os.remove(val.rada_log_file)

@@ -13,12 +13,12 @@ Neuropycon project for graph analysis, can be used from ephypype and nipype
 Documentation
 -------------
 
-http://neuropycon.github.io/neuropycon_doc/graphpype/
+https://neuropycon.github.io/graphpype/
 
 Installation
 ------------
 
-git clone https://github.com/neuropycon/graphpype.git
+pip install https://api.github.com/repos/neuropycon/graphpype/zipball/master
 
 Or with pip:
     

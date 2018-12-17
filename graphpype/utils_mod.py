@@ -440,6 +440,8 @@ def compute_roles(community_vect, sparse_mat, role_type="Amaral_roles"):
 
 
 # modules and intermodules computation
+
+
 def _inter_module_avgmat(con_mat, community_vect):
     """
     intermodules computation
