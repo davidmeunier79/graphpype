@@ -16,6 +16,9 @@ def visu_graph(net_file, coords_file, labels_file, modality_type="fMRI",
     if modality_type == "MEG":
         coords = 1000*coords
 
+        coords = np.swapaxes(coords,0,1)
+
+
     # labels
     labels = [line.strip() for line in open(labels_file)]
     npLabels = np.array(labels)
@@ -102,8 +105,17 @@ def visu_graph_modules(net_file, lol_file, coords_file, labels_file,
 
     # coords
     coords = np.loadtxt(coords_file)
+    print (coords)
     if modality_type == "MEG":
         coords = 1000*coords
+        temp = np.copy(coords)
+
+        coords[:,2] = coords[:,2] - 60
+        coords [:,1] = coords[:,0]
+        coords[:,0] = temp [:,1]
+
+    print (coords)
+    print (coords.shape)
 
     # labels
     labels = [line.strip() for line in open(labels_file)]
