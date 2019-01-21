@@ -251,6 +251,16 @@ def compute_nodes_rada_df(local_dir, gm_coords, coords_file, labels_file,
             np.concatenate((node_roles, part_coeff, Z_com_degree), axis=1),
             columns=['Role_quality', 'Role_quantity',
                      'Participation_coefficient', 'Z_community_degree']))
+    # ndi values
+    ndi_values_file = os.path.join(
+        local_dir, "node_roles", "ndi_values.txt")
+
+    if os.path.exists(ndi_values_file):
+
+        # loding node roles
+        ndi_values = np.array(np.loadtxt(ndi_values_file))
+        list_df.append(pd.DataFrame(ndi_values,
+                                    columns=['NodeDissociationIndex']))
 
     return list_df
 
