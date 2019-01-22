@@ -260,7 +260,7 @@ def compute_nodes_rada_df(local_dir, gm_coords, coords_file, labels_file,
         # loding node roles
         ndi_values = np.array(np.loadtxt(ndi_values_file))
         list_df.append(pd.DataFrame(ndi_values,
-                                    columns=['NodeDissociationIndex']))
+                                    columns=['Node_Dissociation_Index']))
 
     return list_df
 
