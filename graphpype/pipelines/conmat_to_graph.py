@@ -139,7 +139,7 @@ def create_pipeline_conmat_to_graph_density(
 
 def create_pipeline_conmat_to_graph_threshold(
         main_path, pipeline_name="graph_thr_pipe", con_thr=1.0, multi=False,
-        mod=True, plot=True, optim_seq="WS trfr 100", compute_ndi=False):):
+        mod=True, plot=True, optim_seq="WS trfr 100", compute_ndi=False):
     """
     Description:
 
