@@ -110,8 +110,8 @@ def visu_graph_kcore(net_file, coords_file, labels_file, node_size_file,
 
     # new to visbrain 0.3.7
     s_obj = SourceObj('SourceObj1', coords, text=npLabels,
-                      data=node_size, text_color=s_textcolor, color='blue',
-                      alpha=.5, edge_width=2., radius_min=1., radius_max=1.)
+                      data=node_size, text_color=s_textcolor, text_size = 10,
+                      color='blue', alpha=.5, edge_width=2., radius_min=1., radius_max=1.)
 
     """Create the connectivity object :"""
     c_obj = ConnectObj(name='ConnectObj1', nodes=coords,
