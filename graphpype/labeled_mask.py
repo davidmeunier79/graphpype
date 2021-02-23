@@ -66,7 +66,7 @@ def _coord_transform(x, y, z, affine):
 
 
 def create_indexed_mask(ref_img_file, MNI_coords_list, ROI_dir,
-                        ROI_mask_prefix="def", ROI_shape="cube", ROI_size=10):
+                        ROI_mask_prefix="def", ROI_shape="cube", ROI_size=5):
     """
     Create indexed mask at the around ROI coords
 
@@ -83,8 +83,8 @@ def create_indexed_mask(ref_img_file, MNI_coords_list, ROI_dir,
 
         dist = cdist(np_coord, np_coord, metric='euclidean')
 
-        assert np.all(dist[np.triu_indices(dist.shape[0], k=1)]
-                      > ROI_size), "Error, distance < {}".format(ROI_size)
+        #assert np.all(dist[np.triu_indices(dist.shape[0], k=1)]
+                      #> ROI_size), "Error, distance between coords < {}".format(ROI_size)
 
     ref_img = nib.load(ref_img_file)
 
@@ -227,7 +227,7 @@ def create_indexed_mask(ref_img_file, MNI_coords_list, ROI_dir,
             indexed_mask_data[cur_coords[:, 0],
                               cur_coords[:, 1], cur_coords[:, 2]] = index_mask
 
-            print(np.sum(indexed_mask_data == index_mask))
+            print(index_mask, np.sum(indexed_mask_data == index_mask))
 
     try:
         os.makedirs(ROI_dir)
