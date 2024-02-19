@@ -11,9 +11,9 @@ def plot_cormat(plot_file, cor_mat, list_labels=[], fix_full_range=[],
 
     if len(fix_full_range):
         im = ax.matshow(cor_mat, vmin=fix_full_range[0],
-                        vmax=fix_full_range[1], interpolation='nearest')
+                        vmax=fix_full_range[1], interpolation="none")
     else:
-        im = ax.matshow(cor_mat, interpolation='nearest')
+        im = ax.matshow(cor_mat, interpolation="none")
 
     [i.set_visible(False) for i in ax.spines.values()]
     im.set_cmap(cmap)

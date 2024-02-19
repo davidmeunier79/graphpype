@@ -24,8 +24,7 @@ from graphpype.utils_cor import (return_corres_correl_mat,
                                  return_conf_cor_mat, regress_parameters,
                                  filter_data, normalize_data,
                                  mean_select_mask_data,
-                                 mean_select_indexed_mask_data,
-                                 spearmanr_by_hand)
+                                 mean_select_indexed_mask_data)
 
 
 from graphpype.utils import check_np_dimension
@@ -899,7 +898,7 @@ class SplitTS(BaseInterface):
         assert ts.shape[0] > win_length, "Error, win_length longer than ts"
         assert offset < win_length,\
             "Error, offset {} longer than win_length {}".format(
-                offset, win_length)
+                offset < win_length)
 
         ts_length = ts.shape[1]
 
@@ -1422,29 +1421,21 @@ class ComputeConfCorMatInputSpec(BaseInterfaceInputSpec):
 class ComputeConfCorMatOutputSpec(TraitedSpec):
 
     cor_mat_file = File(
-        exists=True, desc="npy file containing the R of Pearson correlation")
+        exists=True, desc="npy file containing the R values of correlation")
 
     Z_cor_mat_file = File(
         exists=True,
         desc="npy file containing the Z-values (after Fisher's R-to-Z \
-            trasformation) of Pearson correlation")
+            trasformation) of correlation")
 
     conf_cor_mat_file = File(
         exists=True,
-        desc="npy file with the confidence interval around Pearson R values")
+        desc="npy file containing the confidence interval around R values")
 
     Z_conf_cor_mat_file = File(
         exists=True,
         desc="npy file containing the Z-values (after Fisher's R-to-Z \
-            transformation) of Pearson correlation")
-
-    rho_mat_file = File(
-        exists=True,
-        desc="npy file containing Rho values of Spearman correlation")
-
-    pval_mat_file = File(
-        exists=True,
-        desc="npy file containing the p values of Spearman correlation")
+            trasformation) of correlation")
 
 
 class ComputeConfCorMat(BaseInterface):
@@ -1571,12 +1562,11 @@ class ComputeConfCorMat(BaseInterface):
 
         elif method == "Spearman":
             print("Computing Spearman correlation")
-            # rho_mat, pval_mat = scipy.stats.spearmanr(data_matrix)
+            rho_mat, pval_mat = scipy.stats.spearmanr(data_matrix)
+
             # for graph, it is better to remove the possible self-loops in rho,
             # hence setting 0
-            # np.fill_diagonal(rho_mat, 0)
-
-            rho_mat, pval_mat = spearmanr_by_hand(data_matrix)
+            np.fill_diagonal(rho_mat, 0)
 
             # saving rho values
             rho_mat_file = os.path.abspath('rho_mat_' + fname + '.npy')
@@ -1670,26 +1660,16 @@ class ComputeConfCorMat(BaseInterface):
 
         path, fname, ext = split_f(self.inputs.ts_file)
 
-        if self.inputs.method == "Pearson":
-            outputs["cor_mat_file"] = os.path.abspath(
-                'cor_mat_' + fname + '.npy')
+        outputs["cor_mat_file"] = os.path.abspath('cor_mat_' + fname + '.npy')
 
-            outputs["conf_cor_mat_file"] = os.path.abspath(
-                'conf_cor_mat_' + fname + '.npy')
+        outputs["conf_cor_mat_file"] = os.path.abspath(
+            'conf_cor_mat_' + fname + '.npy')
 
-            outputs["Z_cor_mat_file"] = os.path.abspath(
-                'Z_cor_mat_' + fname + '.npy')
+        outputs["Z_cor_mat_file"] = os.path.abspath(
+            'Z_cor_mat_' + fname + '.npy')
 
-            outputs["Z_conf_cor_mat_file"] = os.path.abspath(
-                'Z_conf_cor_mat_' + fname + '.npy')
-
-        elif self.inputs.method == "Spearman":
-
-            outputs["rho_mat_file"] = os.path.abspath(
-                 'rho_mat_' + fname + '.npy')
-
-            outputs["pval_mat_file"] = os.path.abspath(
-                'pval_mat_' + fname + '.npy')
+        outputs["Z_conf_cor_mat_file"] = os.path.abspath(
+            'Z_conf_cor_mat_' + fname + '.npy')
 
         return outputs
 
@@ -2039,8 +2019,8 @@ class PrepareMeanCorrel(BaseInterface):
 
             assert len(cor_mat_files) == len(labels_files), \
                 ("warning, length of cor_mat_files, labels_files are \
-                    imcompatible {} {}".format(len(cor_mat_files),
-                                               len(labels_files)))
+                    imcompatible {} {} {}".format(len(cor_mat_files),
+                                                  len(labels_files)))
 
             for i in range(len(cor_mat_files)):
 
@@ -2196,7 +2176,7 @@ class PreparePermutMeanCorrel(BaseInterface):
                    for cor_mat_file in self.inputs.cor_mat_files]
 
         assert len(cormats) == sum(self.inputs.permut_group_sizes), ("Error,\
-            len(cormats) {} != sum permut_group_sizes {}".format(
+            len(cormats) {} != sum permut_group_sizes {1}".format(
             len(cormats), sum(self.inputs.permut_group_sizes)))
 
         subj_indexes = np.arange(len(cormats))

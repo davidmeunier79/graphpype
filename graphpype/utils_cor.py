@@ -270,26 +270,3 @@ def return_corres_correl_mat_labels(mat, labels, corres_labels):
     print(corres_mat.shape)
 
     return corres_mat, possible_edge_mat
-
-
-def spearmanr_by_hand(ts_mat, nan_policy="omit"):
-    """
-    Overwrite of scipy.stats.spearmanr, with unclear nan behaviour when
-    applied on a set of time series
-    """
-    nb_col = ts_mat.shape[1]
-    rho_mat = np.zeros((nb_col, nb_col))
-    pval_mat = np.ones((nb_col, nb_col))
-
-    for i, j in it.combinations(range(nb_col), r=2):
-        if i != j:
-            rho, p = stats.spearmanr(ts_mat[:, i], ts_mat[:, j],
-                                     nan_policy=nan_policy)
-
-            rho_mat[i, j] = rho
-            rho_mat[j, i] = rho
-
-            pval_mat[i, j] = p
-            pval_mat[j, i] = p
-
-    return rho_mat, pval_mat

@@ -10,7 +10,6 @@ from collections import Counter
 
 from graphpype.utils_net import read_Pajek_corres_nodes
 from graphpype.utils_dtype_coord import where_in_coords
-from graphpype.utils_cor import where_in_labels
 
 from graphpype.utils_mod import read_lol_file
 from graphpype.utils_mod import get_modularity_value_from_lol_file
@@ -93,9 +92,6 @@ def compute_rada_df(iter_path, df, radatools_version="3.2", mapflow=[],
             df['Diameter'] = str(diameter)
             df['Global_efficiency'] = str(global_efficiency)
 
-        else:
-            print("Could not find file {}".format(path_length_file))
-
     else:
 
         df['Modularity'] = []
@@ -160,7 +156,7 @@ def compute_rada_df(iter_path, df, radatools_version="3.2", mapflow=[],
 
 
 def compute_nodes_rada_df(
-        local_dir, gm_coords=[], coords_file="", gm_labels=[], labels_file="",
+        local_dir, gm_coords, coords_file, labels_file,
         radatools_version="3.2", mapflow=[], mapflow_name=""):
 
     """node properties df"""
@@ -173,9 +169,6 @@ def compute_nodes_rada_df(
     elif radatools_version == "5.0":
         net_prop_dir = "net_prop"
 
-    elif radatools_version == "run":
-        net_prop_dir = ""
-
     else:
         print("Warning, could not find radatools_version {}"
               .format(radatools_version))
@@ -185,97 +178,48 @@ def compute_nodes_rada_df(
 
     if len(mapflow) == 0:
 
-        Pajek_file = os.path.join(local_dir, net_prop_dir, "Z_List.net")
+        Pajek_file = os.path.join(local_dir, "prep_rada", "Z_List.net")
 
-        if os.path.exists(Pajek_file):
+        if os.path.exists(coords_file) and os.path.exists(Pajek_file) and \
+                os.path.exists(labels_file):
 
-            columns = []
-            columns_names = []
+            # labels
+            labels = np.array([line.strip() for line in open(labels_file)],
+                              dtype=str)
+
+            # MNI coordinates
+            coords = np.array(np.loadtxt(coords_file), dtype=int)
 
             # nodes in the connected graph
             node_corres = read_Pajek_corres_nodes(Pajek_file)
 
-            print(os.path.exists(coords_file))
+            # node_coords
+            node_coords = coords[node_corres, :]
+            node_labels = labels[node_corres].reshape(-1, 1)
 
-            if os.path.exists(coords_file) and len(gm_coords):
+            # where_in_gm_mask
+            where_in_gm_mask = where_in_coords(node_coords, gm_coords)
 
-                # MNI coordinates
-                coords = np.array(np.loadtxt(coords_file), dtype=int)
+            where_in_gm_mask = where_in_gm_mask.reshape(
+                where_in_gm_mask.shape[0], 1)
 
-                # node_coords
-                node_coords = coords[node_corres, :]
-
-                # where_in_gm_mask
-                where_in_gm_mask = where_in_coords(node_coords, gm_coords)
-
-                where_in_gm_mask = where_in_gm_mask.reshape(
-                    where_in_gm_mask.shape[0], 1)
-
-                columns.append(where_in_gm_mask)
-                columns_names.append('Where_in_GM_mask')
-
-                if os.path.exists(labels_file):
-
-                    labels = np.array(
-                        [line.strip() for line in open(labels_file)],
-                        dtype=str)
-
-                    node_labels = labels[node_corres].reshape(-1, 1)
-
-                    columns.append(node_coords)
-                    columns_names.append('labels')
-
-                columns.append(node_coords)
-                columns_names.expend(['MNI_x', 'MNI_y', 'MNI_z'])
-
-            elif os.path.exists(labels_file) and len(gm_labels):
-
-                # TODO
-                labels = np.array([line.strip() for line in open(labels_file)],
-                                  dtype=str)
-
-                node_labels = labels[node_corres].reshape(-1, 1)
-
-                where_in_gm_mask = where_in_labels(node_labels, labels)
-
-                columns.append(where_in_gm_mask)
-                columns_names.append('Where_in_GM_mask')
-
-                columns.append(node_labels)
-                columns_names.append('labels')
-                0/0
-
-            elif len(gm_labels):
-
-                node_labels = np.array(gm_labels)[node_corres].reshape(-1, 1)
-
-                where_in_gm_mask = where_in_labels(node_labels,
-                                                   gm_labels).reshape(-1, 1)
-
-                print(node_labels)
-                print(where_in_gm_mask)
-
-                columns.append(where_in_gm_mask)
-                columns_names.append('Where_in_GM_mask')
-
-                columns.append(node_labels)
-                columns_names.append('labels')
-
-            else:
-                print("No labels, no coords")
-
-                columns.append(node_corres)
-                columns_names.append('node_corres')
-
-            print(columns)
-            print(columns_names)
+            # print where_in_gm_mask
+            print(where_in_gm_mask.shape)
 
             list_df.append(pd.DataFrame(
-                np.concatenate(tuple(columns), axis=1),
-                columns=columns_names))
-
+                np.concatenate((where_in_gm_mask, node_labels, node_coords),
+                               axis=1),
+                columns=['Where_in_GM_mask', 'labels', 'MNI_x', 'MNI_y',
+                         'MNI_z']))
         else:
-            print("Missing {}".format(Pajek_file))
+            if not os.path.exists(coords_file):
+                print("Missing {}".format(coords_file))
+
+            if not os.path.exists(Pajek_file):
+                print("Missing {}".format(Pajek_file))
+
+            if not os.path.exists(labels_file):
+                print("Missing {}".format(labels_file))
 
         info_nodes_file = os.path.join(
             local_dir, net_prop_dir, "Z_List-info_nodes.txt")
@@ -483,11 +427,15 @@ def compute_signif_permuts(permut_df, permut_col="Seed",
     print(seed_index)
 
     # should start with -1
-    if seed_index[0] != -1:
-        print("Error, permut_col {} should start with -1".format(permut_col))
-        return pd.DataFrame()
+    assert seed_index[0] == -1, \
+        ("Error, permut_col {} should start with -1".format(permut_col))
 
     expected_permut_indexes = list(range(len(seed_index)-1))
+
+    # should start at 0 and have all values in between
+    assert all(x in seed_index[1:] for x in expected_permut_indexes), \
+        ("Error, permut indexes should be consecutive and start with \
+              0: {} ".format(expected_permut_indexes))
 
     nb_permuts = len(expected_permut_indexes)
 
@@ -509,62 +457,36 @@ def compute_signif_permuts(permut_df, permut_col="Seed",
     print(data_cols)
 
     # looping over selected columns
+    all_p_higher = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
+    all_p_lower = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
+    count_case = np.zeros(shape=(len(data_cols)), dtype='float64')
+
+    cols = []
+
     if session_col == -1 or len(permut_df[session_col].unique()) == 1:
         print("Compairing one session with itself")
 
-        sum_higher = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-        sum_lower = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-
-        all_p_higher = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-        all_p_lower = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-        count_case = np.zeros(shape=(len(data_cols)), dtype='float64')
-
-        cols = []
-
         for index_col, col in enumerate(data_cols):
 
-            sum_higher[index_col] = np.sum(
-                (permut_df[col].iloc[1:] >= permut_df[col].iloc[0])
-                .values.astype(int))
+            print(index_col, col)
 
+            sum_higher = np.sum(
+                (permut_df[col].iloc[1:] > permut_df[col].iloc[0])
+                .values.astype(int))
             all_p_higher[index_col] = (
-                sum_higher[index_col]+1)/float(permut_df[col].shape[0])
+                sum_higher+1)/float(permut_df[col].shape[0])
 
-            sum_lower[index_col] = np.sum(
-                (permut_df[col].iloc[1:] <= permut_df[col].iloc[0])
+            sum_lower = np.sum(
+                (permut_df[col].iloc[1:] < permut_df[col].iloc[0])
                 .values.astype(int))
-
-            all_p_lower[index_col] = (sum_lower[index_col]+1) / \
+            all_p_lower[index_col] = (sum_lower+1) / \
                 float(permut_df[col].shape[0])
 
             count_case[index_col] = permut_df[col].shape[0]
 
             cols.append(str(col))
-
-        df_res = pd.DataFrame(
-            [sum_higher, sum_lower, all_p_higher,  all_p_lower, count_case],
-            columns=cols)
-
-        df_res.index = ["Sum Higher", "Sum Lower", "Pval Higher",
-                        "Pval Lower", "Count"]
-
     else:
-
-        # should start at 0 and have all values in between
-        if not all(x in seed_index[1:] for x in expected_permut_indexes):
-            print("Error, permut indexes should be consecutive and start with \
-                    #0: {} ".format(expected_permut_indexes))
-            return pd.DataFrame()
-
         print("Compairing diffences between two sessions")
-
-        sum_more = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-
-        all_p_more = np.zeros(shape=(len(data_cols)), dtype='float64') - 1
-        count_case = np.zeros(shape=(len(data_cols)), dtype='float64')
-
-        cols = []
-
         # all unique values should have 2 different samples
         count_elements = Counter(permut_df[permut_col].values)
 
@@ -584,41 +506,38 @@ def compute_signif_permuts(permut_df, permut_col="Seed",
             df_col = permut_df.pivot(
                 index=permut_col, columns=session_col, values=col)
 
-            print(df_col)
+            df_col["Diff"] = pd.to_numeric(
+                df_col.iloc[:, 0]) - pd.to_numeric(df_col.iloc[:, 1])
 
-            col_0 = pd.to_numeric(df_col.iloc[:, 0])
-            col_1 = pd.to_numeric(df_col.iloc[:, 1])
-
-            df_col["Diff"] = col_0 - col_1
-
-            print(df_col["Diff"])
-
-            sign_diff = np.sign(df_col["Diff"][0])
-            diff_col = df_col["Diff"].abs().dropna().reset_index(drop=True)
-
-            print(diff_col)
+            diff_col = df_col["Diff"].dropna().reset_index(drop=True)
 
             if diff_col.shape[0] == 0:
-                sum_more[index_col] = np.nan
-                all_p_more[index_col] = np.nan
+                all_p_higher[index_col] = np.nan
+                all_p_lower[index_col] = np.nan
                 cols.append(col)
                 continue
 
-            print("***", diff_col[0], sign_diff)
+            if diff_col[0] > 0:
+                sum_higher = np.sum(
+                    np.array(diff_col[1:] > diff_col[0], dtype=int))
+                print(col, "sum_higher:", sum_higher)
+                all_p_higher[index_col] = \
+                    (sum_higher+1)/float(diff_col.shape[0])
 
-            sum_more[index_col] = np.sum(
-                np.array(diff_col[1:] > diff_col[0], dtype=int))
-            print(col, "sum_more:", sum_more[index_col])
-            all_p_more[index_col] = \
-                (sum_more[index_col]+1)/float(diff_col.shape[0])*sign_diff
+            elif diff_col[0] < 0:
+                sum_lower = np.sum(
+                    np.array(diff_col[1:] < diff_col[0], dtype=int))
+                print(col, "sum_lower:", sum_lower)
+                all_p_lower[index_col] = (sum_lower+1)/float(diff_col.shape[0])
+            else:
+                print("not able to do diff")
 
             count_case[index_col] = diff_col.shape[0]
             cols.append(col)
 
-        df_res = pd.DataFrame([sum_more, all_p_more, count_case],
-                              columns=cols)
-
-        df_res.index = ["Sum More", "Pval More", "Count"]
+    df_res = pd.DataFrame([all_p_higher, all_p_lower, count_case],
+                          columns=cols)
+    df_res.index = ["Higher", "Lower", "Count"]
 
     return df_res
 
