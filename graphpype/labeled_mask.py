@@ -89,7 +89,7 @@ def create_indexed_mask(ref_img_file, MNI_coords_list, ROI_dir,
     ref_img = nib.load(ref_img_file)
 
     # data (shape)
-    ref_img_shape = ref_img.get_data().shape
+    ref_img_shape = ref_img.get_fdata().shape
 
     if len(ref_img_shape) == 4:
 
@@ -259,7 +259,7 @@ def compute_ROI_nii_from_ROI_coords_files(
     Export single file VOI binary nii image
     """
     ref_image = nib.load(ref_img_file)
-    ref_image_data = ref_image.get_data()
+    ref_image_data = ref_image.get_fdata()
     ref_image_data_shape = ref_image_data.shape
     ref_image_data_sform = ref_image.get_sform()
 
@@ -321,7 +321,7 @@ def compute_labelled_mask_from_anat_ROIs(
 
     ref_image = nib.load(ref_img_file)
 
-    ref_image_data = ref_image.get_data()
+    ref_image_data = ref_image.get_fdata()
 
     ref_image_data_shape = ref_image_data.shape
 
@@ -338,7 +338,7 @@ def compute_labelled_mask_from_anat_ROIs(
         # reloading mean_file as ref_file
         ref_image = nib.load(mean_ref_img_file)
 
-        ref_image_data = ref_image.get_data()
+        ref_image_data = ref_image.get_fdata()
 
         ref_image_data_shape = ref_image_data.shape
 
@@ -354,7 +354,7 @@ def compute_labelled_mask_from_anat_ROIs(
 
                 ROI_image = nib.load(ROI_file)
 
-                ROI_data = ROI_image.get_data()
+                ROI_data = ROI_image.get_fdata()
 
                 print("Original ROI template {} shape: {}".
                       format(i, ROI_data.shape))
@@ -391,7 +391,7 @@ def compute_labelled_mask_from_anat_ROIs(
 
                 ROI_image = nib.load(ROI_file)
 
-                ROI_data = ROI_image.get_data()
+                ROI_data = ROI_image.get_fdata()
 
                 print("Original ROI template {} shape: {}".
                       format(i, ROI_data.shape))
@@ -425,7 +425,7 @@ def compute_labelled_mask_from_anat_ROIs(
 
         resliced_ROI_img = nib.load(resliced_ROI_file)
 
-        resliced_ROI_data = resliced_ROI_img.get_data()
+        resliced_ROI_data = resliced_ROI_img.get_fdata()
 
         print(resliced_ROI_data.shape)
 
@@ -457,6 +457,13 @@ def compute_MNI_coords_from_indexed_template(indexed_template_file):
     """
     compute MNI coords from an indexed template
     """
+
+    from nipype.utils.filemanip import split_filename as split_f
+
+    import numpy as np
+    import nibabel as nib
+    import os
+
     path, base, ext = split_f(indexed_template_file)
 
     print(base)
@@ -468,7 +475,7 @@ def compute_MNI_coords_from_indexed_template(indexed_template_file):
 
     ref_image = nib.load(indexed_template_file)
 
-    ref_image_data = ref_image.get_data()
+    ref_image_data = ref_image.get_fdata()
 
     print(ref_image_data.shape)
 
@@ -486,32 +493,31 @@ def compute_MNI_coords_from_indexed_template(indexed_template_file):
 
         mean_coord_ijk = np.mean(np.array((i, j, k)), axis=1)
 
-        print(mean_coord_ijk)
-
         ROI_coords.append(mean_coord_ijk)
 
         MNI_coord = np.dot(ref_image_affine, np.append(mean_coord_ijk, 1))
-
-        print(MNI_coord)
 
         ROI_MNI_coords.append(MNI_coord[:3])
 
     ROI_coords = np.array(ROI_coords, dtype=float)
 
-    print(ROI_coords)
-
     ROI_MNI_coords = np.array(ROI_MNI_coords, dtype=float)
 
-    print(ROI_MNI_coords)
+    ROI_coords_file = os.path.abspath("ROI_coords-" + base_name + ".txt")
+    #
+    # np.savetxt(ROI_coords_file, ROI_coords, fmt="%.3f %.3f %.3f")
+    #
+    # ROI_MNI_coords_file = os.path.join(
+    #     path, "ROI_MNI_coords-" + base_name + ".txt")
+    #
+    # np.savetxt(ROI_MNI_coords_file, ROI_MNI_coords, fmt="%.3f %.3f %.3f")
+    #
 
-    ROI_coords_file = os.path.join(path, "ROI_coords-" + base_name + ".txt")
+    np.savetxt(ROI_coords_file, ROI_coords, fmt="%d %d %d")
 
-    np.savetxt(ROI_coords_file, ROI_coords, fmt="%.3f %.3f %.3f")
+    ROI_MNI_coords_file = os.path.abspath("ROI_MNI_coords-" + base_name + ".txt")
 
-    ROI_MNI_coords_file = os.path.join(
-        path, "ROI_MNI_coords-" + base_name + ".txt")
-
-    np.savetxt(ROI_MNI_coords_file, ROI_MNI_coords, fmt="%.3f %.3f %.3f")
+    np.savetxt(ROI_MNI_coords_file, ROI_MNI_coords, fmt="%d %d %d")
 
     return ROI_coords_file, ROI_MNI_coords_file
     # nib.load(ref_img_file)
@@ -528,7 +534,7 @@ def segment_mask_in_ROI(
 
     # load mask
     mask = nib.load(mask_file)
-    mask_data = mask.get_data()
+    mask_data = mask.get_fdata()
     mask_header = mask.header
     mask_affine = mask.affine
 
@@ -630,3 +636,22 @@ def segment_mask_in_ROI(
         compute_MNI_coords_from_indexed_template(indexed_mask_rois_file)
 
     return indexed_mask_rois_file, ROI_coords_file, ROI_MNI_coords_file
+
+
+def compute_labels_from_coords(coords_file):
+
+    import os
+    import numpy as np
+
+
+    ROI_MNI_coords = np.loadtxt(coords_file, dtype = int)
+
+    labels = []
+    for coord in ROI_MNI_coords:
+
+        labels.append("_".join(map(str, coord)))
+
+    ROI_labels_file = os.path.abspath("labels.txt")
+    np.savetxt(ROI_labels_file, labels, fmt = "%s")
+
+    return ROI_labels_file

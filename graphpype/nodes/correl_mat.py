@@ -62,6 +62,9 @@ class ExtractTSInputSpec(BaseInterfaceInputSpec):
         -1.0, desc='value for background (i.e. outside brain)',
         usedefault=True)
 
+    save_npy = traits.Bool(
+        False, desc="Saving as npy (if False, as txt)", usedefault=True)
+
 
 class ExtractTSOutputSpec(TraitedSpec):
 
@@ -151,6 +154,7 @@ class ExtractTS(BaseInterface):
         percent_signal = self.inputs.percent_signal
         background_val = self.inputs.background_val
         plot_fig = self.inputs.plot_fig
+        save_npy = self.inputs.save_npy
 
         # loading ROI indexed mask
         indexed_rois_img = nib.load(indexed_rois_file)
@@ -198,14 +202,24 @@ class ExtractTS(BaseInterface):
 
         mean_masked_ts = np.array(mean_masked_ts, dtype='f')
 
-        # saving time series
-        mean_masked_ts_file = os.path.abspath("mean_masked_ts.txt")
-        np.savetxt(mean_masked_ts_file, mean_masked_ts, fmt='%.3f')
+        if save_npy:
+            # saving time series
+            self.mean_masked_ts_file = os.path.abspath("mean_masked_ts.npy")
+            np.save(self.mean_masked_ts_file, mean_masked_ts)
+
+        else:
+            # saving time series
+            self.mean_masked_ts_file = os.path.abspath("mean_masked_ts.txt")
+            np.savetxt(self.mean_masked_ts_file, mean_masked_ts, fmt='%.3f')
 
         if plot_fig:
+            print("**** Plotting figure")
+
             # plotting mean_masked_ts
-            plot_mean_masked_ts_file = os.path.abspath('mean_masked_ts.eps')
+            plot_mean_masked_ts_file = os.path.abspath('mean_masked_ts.pdf')
             plot_signals(plot_mean_masked_ts_file, mean_masked_ts)
+        else:
+            print("**** Skipping Plotting figure")
 
         return runtime
 
@@ -213,7 +227,7 @@ class ExtractTS(BaseInterface):
 
         outputs = self._outputs().get()
 
-        outputs["mean_masked_ts_file"] = os.path.abspath("mean_masked_ts.txt")
+        outputs["mean_masked_ts_file"] = self.mean_masked_ts_file
 
         if isdefined(self.inputs.MNI_coord_rois_file):  # pragma: no cover
             outputs["subj_MNI_coord_rois_file"] = os.path.abspath(
@@ -586,7 +600,7 @@ class ExtractMeanTS(BaseInterface):
         if plot_fig:
             # plotting mean_masked_ts
             plot_signals(
-                os.path.abspath('mean_' + suffix + '_ts.eps'),
+                os.path.abspath('mean_' + suffix + '_ts.pdf'),
                 mean_masked_ts)
 
         return runtime
@@ -1069,11 +1083,11 @@ class RegressCovar(BaseInterface):
             if self.inputs.plot_fig:
 
                 # plotting resid_ts
-                plot_resid_ts_file = os.path.abspath('resid_ts.eps')
+                plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
                 plot_sep_signals(plot_resid_ts_file, z_score_data_matrix)
 
                 # plotting diff filtered and non filtered data
-                plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.eps')
+                plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
                 diff_resid = resid_filt_data_matrix - resid_data_matrix
                 plot_signals(plot_diff_filt_ts_file,
                              np.array(diff_resid, dtype='float'))
@@ -1089,7 +1103,7 @@ class RegressCovar(BaseInterface):
 
             if self.inputs.plot_fig:
                 # plotting resid_ts
-                plot_resid_ts_file = os.path.abspath('resid_ts.eps')
+                plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
                 plot_sep_signals(plot_resid_ts_file, resid_data_matrix)
 
         return runtime
@@ -1597,67 +1611,67 @@ class ComputeConfCorMat(BaseInterface):
             if method == "Spearman":
                 # rho_mat
                 plot_heatmap_rho_mat_file = os.path.abspath(
-                    'heatmap_rho_mat_' + fname + '.eps')
+                    'heatmap_rho_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_rho_mat_file, rho_mat,
                             list_labels=labels)
 
                 # rho_mat histogram
                 plot_hist_rho_mat_file = os.path.abspath(
-                    'hist_rho_mat_' + fname + '.eps')
+                    'hist_rho_mat_' + fname + '.pdf')
 
                 plot_hist(plot_hist_rho_mat_file, rho_mat, nb_bins=100)
 
                 # pval_mat
                 plot_heatmap_pval_mat_file = os.path.abspath(
-                    'heatmap_pval_mat_' + fname + '.eps')
+                    'heatmap_pval_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_pval_mat_file, pval_mat,
                             list_labels=labels)
 
                 # pval_mat histogram
                 plot_hist_pval_mat_file = os.path.abspath(
-                    'hist_pval_mat_' + fname + '.eps')
+                    'hist_pval_mat_' + fname + '.pdf')
 
                 plot_hist(plot_hist_pval_mat_file, pval_mat, nb_bins=100)
 
             elif method == "Pearson":
                 # cor_mat heatmap
                 plot_heatmap_cor_mat_file = os.path.abspath(
-                    'heatmap_cor_mat_' + fname + '.eps')
+                    'heatmap_cor_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_cor_mat_file, cor_mat,
                             list_labels=labels)
 
                 # cor_mat histogram
                 plot_hist_cor_mat_file = os.path.abspath(
-                    'hist_cor_mat_' + fname + '.eps')
+                    'hist_cor_mat_' + fname + '.pdf')
 
                 plot_hist(plot_hist_cor_mat_file, cor_mat, nb_bins=100)
 
                 # Z_cor_mat heatmap
                 plot_heatmap_Z_cor_mat_file = os.path.abspath(
-                    'heatmap_Z_cor_mat_' + fname + '.eps')
+                    'heatmap_Z_cor_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_Z_cor_mat_file,
                             Z_cor_mat, list_labels=labels)
 
                 # Z_cor_mat histogram
                 plot_hist_Z_cor_mat_file = os.path.abspath(
-                    'hist_Z_cor_mat_' + fname + '.eps')
+                    'hist_Z_cor_mat_' + fname + '.pdf')
 
                 plot_hist(plot_hist_Z_cor_mat_file, Z_cor_mat, nb_bins=100)
 
                 # conf_cor_mat heatmap
                 plot_heatmap_conf_cor_mat_file = os.path.abspath(
-                    'heatmap_conf_cor_mat_' + fname + '.eps')
+                    'heatmap_conf_cor_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_conf_cor_mat_file,
                             conf_cor_mat, list_labels=labels)
 
                 # Z_conf_cor_mat heatmap
                 plot_heatmap_Z_conf_cor_mat_file = os.path.abspath(
-                    'heatmap_Z_conf_cor_mat_' + fname + '.eps')
+                    'heatmap_Z_conf_cor_mat_' + fname + '.pdf')
 
                 plot_cormat(plot_heatmap_Z_conf_cor_mat_file,
                             Z_conf_cor_mat, list_labels=labels)
@@ -1816,7 +1830,7 @@ class ComputeSpearmanMat(BaseInterface):
 
             # heatmap rho_mat
             plot_heatmap_rho_mat_file = os.path.abspath(
-                'heatmap_rho_mat_' + fname + '.eps')
+                'heatmap_rho_mat_' + fname + '.pdf')
             plot_cormat(plot_heatmap_rho_mat_file, rho_mat, list_labels=labels)
 
         if export_csv:
@@ -2139,7 +2153,7 @@ class PrepareMeanCorrel(BaseInterface):
 
             # heatmap
             plot_heatmap_avg_cor_mat_file = os.path.abspath(
-                'heatmap_avg_cor_mat.eps')
+                'heatmap_avg_cor_mat.pdf')
             plot_cormat(plot_heatmap_avg_cor_mat_file,
                         avg_cor_mat_matrix, list_labels=labels)
 
