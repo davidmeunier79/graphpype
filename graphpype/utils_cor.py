@@ -61,6 +61,8 @@ def mean_select_indexed_mask_data(data_img, data_indexed_mask,
     if sequence_roi_index[0] == background_val:
         sequence_roi_index = sequence_roi_index[1:]
 
+    print(sequence_roi_index)
+
     # mean_masked_ts
     mean_masked_ts = []
     keep_rois = np.zeros(shape=(sequence_roi_index.shape[0]), dtype=bool)
