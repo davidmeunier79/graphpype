@@ -36,18 +36,29 @@ def return_int_net_list(int_mat, min_int=0):
     return net_list
 
 
-def read_Pajek_corres_nodes(Pajek_net_file):
+def read_Pajek_corres_nodes(Pajek_net_file, use_orig_Pajek_index = True):
     """
     reading corresponding vector from Pajek file
     """
     with open(Pajek_net_file, 'r') as f:
         lines = f.readlines()
         nb_elements = int(lines[0].split(' ')[1])
+
+        print(lines[1:(nb_elements+1)])
+        0/0
+
         node_corres = np.empty((nb_elements), dtype='int')
         for i, line in enumerate(lines[1:(nb_elements+1)]):
             new_index, old_index = line.split(' ')
+
             if (i+1) == int(new_index):
-                node_corres[i] = int(old_index)-1
+
+                index = old_index
+
+                if not use_orig_Pajek_index :
+                    index = int(index)-1
+
+                node_corres[i] = index
             else:
                 print("Warning, incompatible indexes {} {}".format(new_index,
                                                                    i+1))
