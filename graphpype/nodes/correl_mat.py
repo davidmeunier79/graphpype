@@ -172,10 +172,6 @@ class ExtractTS(BaseInterface):
 
             MNI_coord_rois = np.loadtxt(self.inputs.MNI_coord_rois_file)
 
-            print(keep_rois.shape)
-            print(MNI_coord_rois.shape)
-
-            0/0
             subj_MNI_coord_rois = MNI_coord_rois[keep_rois, :]
 
             # saving subject ROIs
@@ -188,9 +184,6 @@ class ExtractTS(BaseInterface):
 
             coord_rois = np.loadtxt(self.inputs.coord_rois_file)
 
-            print(keep_rois.shape)
-            print(coord_rois.shape)
-            0/0
             subj_coord_rois = coord_rois[keep_rois, :]
 
             # saving subject ROIs
