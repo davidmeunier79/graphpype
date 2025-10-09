@@ -152,7 +152,8 @@ def create_pipeline_nii_to_conmat_seg_template(
         conf_interval_prob=0.05,
         background_val = -1,
         normalized_residuals=True,
-        filtered_residuals=True):
+        filtered_residuals=True,
+        plot_fig=True):
 
     """
     Pipeline from nifti 4D (after preprocessing) to connectivity matrices
@@ -187,7 +188,7 @@ def create_pipeline_nii_to_conmat_seg_template(
     # Nodes version: use min_BOLD_intensity and
     # return coords where signal is strong enough
     extract_mean_ROI_ts = pe.Node(interface=ExtractTS(
-        plot_fig=False), name='extract_mean_ROI_ts')
+        plot_fig=plot_fig), name='extract_mean_ROI_ts')
 
     pipeline.connect(inputnode, 'nii_4D_file', extract_mean_ROI_ts, 'file_4D')
     pipeline.connect(inputnode, 'ROI_mask_file',
@@ -203,7 +204,7 @@ def create_pipeline_nii_to_conmat_seg_template(
 
     # extract white matter signal
     compute_wm_ts = pe.Node(interface=ExtractMeanTS(
-        plot_fig=False), name='extract_wm_ts')
+        plot_fig=plot_fig), name='extract_wm_ts')
     compute_wm_ts.inputs.suffix = 'wm'
 
     pipeline.connect(inputnode, 'nii_4D_file', compute_wm_ts, 'file_4D')
@@ -212,18 +213,17 @@ def create_pipeline_nii_to_conmat_seg_template(
 
     # extract csf signal
     compute_csf_ts = pe.Node(interface=ExtractMeanTS(
-        plot_fig=False), name='extract_csf_ts')
+        plot_fig=plot_fig), name='extract_csf_ts')
     compute_csf_ts.inputs.suffix = 'csf'
 
     pipeline.connect(inputnode, 'nii_4D_file', compute_csf_ts, 'file_4D')
     pipeline.connect(inputnode, 'csf_anat_file',
                      compute_csf_ts, 'filter_mask_file')
 
-    regress_covar = pe.Node(interface=RegressCovar(), iterfield=[
+    regress_covar = pe.Node(interface=RegressCovar(plot_fig=plot_fig), iterfield=[
                             'masked_ts_file', 'rp_file'], name='regress_covar')
 
     regress_covar.inputs.filtered_residuals= filtered_residuals
-
     regress_covar.inputs.normalized_residuals = normalized_residuals
 
     pipeline.connect(extract_mean_ROI_ts, 'mean_masked_ts_file',

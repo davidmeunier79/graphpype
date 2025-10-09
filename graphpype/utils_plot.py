@@ -166,3 +166,25 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
 
     plot_signals(plot_signals_file, signals_matrix, ylim=[ymin, ymax],
                  colors=colors, labels=labels)
+
+
+def plot_pair_signals(plot_signals_file, signals1, signal2, colors=[], labels=[],
+                     range_signal=1):
+    """Plotting signals separately"""
+
+    # keeping for sake of compatibility
+    assert len(signals1.shape) == 1, ("No interest to use \
+        plot_pair_signals, use plot_signals instead")
+
+    assert len(signals2.shape) == 1, ("No interest to use \
+        plot_pair_signals, use plot_signals instead")
+
+    assert signals1.shape[0] == signals2.shape[0], (f"Signals should have the same length {signals1.shape[0]} =! {signals2.shape[0]}")
+
+    signals_matrix = np.concatenante(signals1, signal2)
+
+    ymin = np.amin(signals_matrix)-2
+    ymax = np.amax(signals_matrix)+2
+
+    plot_signals(plot_signals_file, signals_matrix, ylim=[ymin, ymax],
+                 colors=colors, labels=labels)

@@ -177,6 +177,7 @@ class ExtractTS(BaseInterface):
             except IndexError:
                 print(f"Error with shapes: {keep_rois.shape}, {MNI_coord_rois.shape}")
                 0/0
+
             # saving subject ROIs
             subj_MNI_coord_rois_file = os.path.abspath(
                 "subj_MNI_coord_rois.txt")
@@ -1101,13 +1102,18 @@ class RegressCovar(BaseInterface):
                 plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
                 plot_sep_signals(plot_resid_ts_file, z_score_data_matrix)
 
+                # plotting resid_ts
+                plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
+                plot_signals(plot_mean_resid_ts_file, np.mean(z_score_data_matrix)
+
+
                 if self.inputs.filtered_residuals:
 
                     # plotting diff filtered and non filtered data
                     plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
-                    diff_resid = resid_filt_data_matrix - resid_data_matrix
-                    plot_signals(plot_diff_filt_ts_file,
-                                 np.array(diff_resid, dtype='float'))
+
+                    plot_pair_signals(plot_diff_filt_ts_file, np.mean(resid_filt_data_matrix), np.mean(resid_data_matrix))
+
 
         else:
 
