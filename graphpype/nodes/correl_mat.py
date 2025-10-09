@@ -172,8 +172,11 @@ class ExtractTS(BaseInterface):
 
             MNI_coord_rois = np.loadtxt(self.inputs.MNI_coord_rois_file)
 
-            subj_MNI_coord_rois = MNI_coord_rois[keep_rois, :]
-
+            try:
+                subj_MNI_coord_rois = MNI_coord_rois[keep_rois, :]
+            except IndexError:
+                print(f"Error with shapes: {keep_rois.shape}, {MNI_coord_rois.shape}")
+                0/0
             # saving subject ROIs
             subj_MNI_coord_rois_file = os.path.abspath(
                 "subj_MNI_coord_rois.txt")
