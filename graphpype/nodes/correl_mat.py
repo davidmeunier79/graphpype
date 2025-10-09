@@ -1104,8 +1104,10 @@ class RegressCovar(BaseInterface):
 
                 # plotting resid_ts
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
-                plot_signals(plot_mean_resid_ts_file, np.mean(z_score_data_matrix))
+                print(z_score_data_matrix.shape)
+                plot_signals(plot_mean_resid_ts_file, np.mean(z_score_data_matrix, axis = 1))
 
+                0/0
 
                 if self.inputs.filtered_residuals:
 
