@@ -150,6 +150,7 @@ def create_pipeline_nii_to_conmat_simple( pipeline_name="nii_to_conmat", conf_in
 def create_pipeline_nii_to_conmat_seg_template(
         pipeline_name="nii_to_conmat",
         conf_interval_prob=0.05,
+        background_val = -1,
         normalized_residuals=True,
         filtered_residuals=True):
 
@@ -197,6 +198,8 @@ def create_pipeline_nii_to_conmat_seg_template(
                      extract_mean_ROI_ts, 'MNI_coord_rois_file')
     pipeline.connect(inputnode, 'ROI_labels_file',
                      extract_mean_ROI_ts, 'label_rois_file')
+
+    extract_mean_ROI_ts.inputs.background_val = background_val
 
     # extract white matter signal
     compute_wm_ts = pe.Node(interface=ExtractMeanTS(
