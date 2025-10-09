@@ -964,9 +964,13 @@ class RegressCovarInputSpec(BaseInterfaceInputSpec):
         exists=True, desc='Cerebro-spinal fluid (ventricules) signal',
         mandatory=False)
 
-    filtered_normalized = traits.Bool(
+    normalized_residuals = traits.Bool(
         True, usedefault=True,
-        desc="Is the signal filtered and normalized after regression?")
+        desc="Is the signal normalized after regression?")
+
+    filtered_residuals = traits.Bool(
+        True, usedefault=True,
+        desc="Is the signal filtered after regression?")
 
     plot_fig = traits.Bool(True, usedefault=True, desc="Plotting signals?")
 
@@ -1066,13 +1070,20 @@ class RegressCovar(BaseInterface):
             # regression movement parameters, return the residuals
             resid_data_matrix = regress_parameters(data_mask_matrix, rp)
 
-        if self.inputs.filtered_normalized:
+        if self.inputs.normalized_residuals:
 
-            # filtering data
-            resid_filt_data_matrix = filter_data(resid_data_matrix)
+            if self.inputs.filtered_residuals:
 
-            # normalizing
-            z_score_data_matrix = normalize_data(resid_filt_data_matrix)
+                # filtering data
+                resid_filt_data_matrix = filter_data(resid_data_matrix)
+
+                # normalizing
+                z_score_data_matrix = normalize_data(resid_filt_data_matrix)
+
+            else:
+
+                # normalizing
+                z_score_data_matrix = normalize_data(resid_data_matrix)
 
             #  saving resid_ts
             resid_ts_file = os.path.abspath('resid_ts.npy')
@@ -1087,11 +1098,13 @@ class RegressCovar(BaseInterface):
                 plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
                 plot_sep_signals(plot_resid_ts_file, z_score_data_matrix)
 
-                # plotting diff filtered and non filtered data
-                plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
-                diff_resid = resid_filt_data_matrix - resid_data_matrix
-                plot_signals(plot_diff_filt_ts_file,
-                             np.array(diff_resid, dtype='float'))
+                if self.inputs.filtered_residuals:
+
+                    # plotting diff filtered and non filtered data
+                    plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
+                    diff_resid = resid_filt_data_matrix - resid_data_matrix
+                    plot_signals(plot_diff_filt_ts_file,
+                                 np.array(diff_resid, dtype='float'))
 
         else:
 

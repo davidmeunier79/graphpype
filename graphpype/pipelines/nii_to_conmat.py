@@ -149,7 +149,9 @@ def create_pipeline_nii_to_conmat_simple( pipeline_name="nii_to_conmat", conf_in
 
 def create_pipeline_nii_to_conmat_seg_template(
         pipeline_name="nii_to_conmat",
-        conf_interval_prob=0.05):
+        conf_interval_prob=0.05,
+        normalized_residuals=True,
+        filtered_residuals=True):
 
     """
     Pipeline from nifti 4D (after preprocessing) to connectivity matrices
@@ -216,6 +218,10 @@ def create_pipeline_nii_to_conmat_seg_template(
 
     regress_covar = pe.Node(interface=RegressCovar(), iterfield=[
                             'masked_ts_file', 'rp_file'], name='regress_covar')
+
+    regress_covar.inputs.filtered_residuals= filtered_residuals
+
+    regress_covar.inputs.normalized_residuals = normalized_residuals
 
     pipeline.connect(extract_mean_ROI_ts, 'mean_masked_ts_file',
                      regress_covar, 'masked_ts_file')
