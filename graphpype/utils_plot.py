@@ -182,8 +182,5 @@ def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
     signals_matrix = np.vstack((signal1, signal2 + 10)).T
     print(signals_matrix.shape)
 
-    ymin = np.amin(signal1)-2
-    ymax = np.amax(signal2)+12
-
-    plot_signals(plot_signals_file, signals_matrix, ylim=[ymin, ymax],
+    plot_signals(plot_signals_file, signals_matrix, ylim = []
                  colors=colors, labels=labels)
