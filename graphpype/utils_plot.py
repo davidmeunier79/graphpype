@@ -179,7 +179,7 @@ def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
 
     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
 
-    signals_matrix = np.concatenate(signal1, signal2, axis = 1)
+    signals_matrix = np.concatenate((signal1, signal2), axis = 1)
     print(signals_matrix)
 
     ymin = np.amin(signal1)-2
