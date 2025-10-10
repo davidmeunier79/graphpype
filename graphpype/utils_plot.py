@@ -184,7 +184,7 @@ def plot_pair_signals(plot_signals_file, signals1, signal2, colors=[], labels=[]
     signals_matrix = np.concatenante(signals1, signal2, axis = 1)
 
     ymin = np.amin(signals1)-2
-    ymax = np.amax(signal2)+2
+    ymax = np.amax(signals2)+2
 
     plot_signals(plot_signals_file, signals_matrix, ylim=[ymin, ymax],
                  colors=colors, labels=labels)
