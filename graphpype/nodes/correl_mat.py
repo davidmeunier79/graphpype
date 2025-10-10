@@ -1100,7 +1100,7 @@ class RegressCovar(BaseInterface):
 
                 # plotting resid_ts
                 plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
-                plot_sep_signals(plot_resid_ts_file, z_score_data_matrix)
+                plot_signals(plot_resid_ts_file, z_score_data_matrix)
 
                 # plotting resid_ts
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
@@ -1127,7 +1127,8 @@ class RegressCovar(BaseInterface):
             if self.inputs.plot_fig:
                 # plotting resid_ts
                 plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
-                plot_sep_signals(plot_resid_ts_file, resid_data_matrix)
+                plot_signals(plot_resid_ts_file, resid_data_matrix)
+
 
         return runtime
 
