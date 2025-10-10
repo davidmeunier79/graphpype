@@ -15,7 +15,7 @@ import os
 import nibabel as nib
 import pandas as pd
 
-from graphpype.utils_plot import (plot_signals, plot_sep_signals, plot_pair_signals
+from graphpype.utils_plot import (plot_signals, plot_sep_signals, plot_pair_signals,
                                   plot_hist, plot_cormat)
 
 
