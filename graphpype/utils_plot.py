@@ -174,12 +174,11 @@ def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
 
     # keeping for sake of compatibility
     assert len(signal1.shape) == 1, "signal1 should be a vector"
-
     assert len(signal2.shape) == 1, "signal2 should be a vector"
 
     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
 
-    signals_matrix = np.vstack((signal1, signal2 + 10))
+    signals_matrix = np.vstack((signal1, signal2))
     print(signals_matrix.shape)
 
     plot_signals(plot_signals_file, signals_matrix, ylim = [],

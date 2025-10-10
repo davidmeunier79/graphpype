@@ -1110,7 +1110,7 @@ class RegressCovar(BaseInterface):
                 # plotting diff filtered and non filtered data
                 plot_diff_ts_file = os.path.abspath('diff_ts.pdf')
 
-                plot_pair_signals(plot_diff_ts_file, np.mean(data_mask_matrix, axis = 0), np.mean(z_score_data_matrix, axis = 0))
+                plot_pair_signals(plot_diff_ts_file, np.mean(resid_data_matrix, axis = 0), np.mean(z_score_data_matrix, axis = 0))
 
                 if self.inputs.filtered_residuals:
 
