@@ -182,5 +182,5 @@ def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
     signals_matrix = np.vstack((signal1, signal2 + 10)).T
     print(signals_matrix.shape)
 
-    plot_signals(plot_signals_file, signals_matrix, ylim = []
+    plot_signals(plot_signals_file, signals_matrix, ylim = [,],
                  colors=colors, labels=labels)
