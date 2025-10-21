@@ -178,7 +178,9 @@ def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
 
     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
 
-    signals_matrix = np.vstack((signal1, signal2))
+    min_2 = np.min(signal2)
+    max_1 = np.max(signal1)
+    signals_matrix = np.vstack((signal1, signal2 + nb.abs(max_1)+ np.abs(min_2))
     print(signals_matrix.shape)
 
     plot_signals(plot_signals_file, signals_matrix, ylim = [],
