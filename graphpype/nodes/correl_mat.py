@@ -1076,6 +1076,9 @@ class RegressCovar(BaseInterface):
 
         if self.inputs.normalized_residuals:
 
+
+            unregressed_norm_data = normalize_data(data_mask_matrix)
+
             if self.inputs.filtered_residuals:
 
                 # filtering data
@@ -1097,31 +1100,35 @@ class RegressCovar(BaseInterface):
             np.savetxt(resid_ts_txt_file, z_score_data_matrix, fmt='%0.3f')
 
             if self.inputs.plot_fig:
-
-                # plotting resid_ts
-                plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
-                plot_signals(plot_resid_ts_file, z_score_data_matrix)
+                #
+                # # plotting resid_ts
+                # plot_resid_ts_file = os.path.abspath('resid_ts.pdf')
+                # plot_signals(plot_resid_ts_file, z_score_data_matrix)
 
                 # plotting resid_ts
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
 
-                plot_signals(plot_mean_resid_ts_file, np.mean(z_score_data_matrix, axis = 0))
+                plot_pair_signals(plot_mean_resid_ts_file, np.mean(unregressed_norm_data), np.mean(z_score_data_matrix, axis = 0))
+
+
 
                 # plotting diff filtered and non filtered data
-                plot_diff_ts_file = os.path.abspath('diff_ts.pdf')
+                plot_unreg_norm_ts_file = os.path.abspath('unreg_norm_ts.pdf')
+                plot_signals(plot_unreg_norm_ts_file, unregressed_norm_data)
 
-                plot_pair_signals(plot_diff_ts_file, np.mean(resid_data_matrix, axis = 0), np.mean(z_score_data_matrix, axis = 0))
+                # plotting diff filtered and non filtered data
+                plot_reg_norm_ts_file = os.path.abspath('reg_norm_ts.pdf')
+                plot_signals(plot_reg_norm_ts_file, z_score_data_matrix)
 
                 if self.inputs.filtered_residuals:
 
                     # plotting diff filtered and non filtered data
                     plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
 
-                    plot_pair_signals(plot_diff_filt_ts_file, np.mean(resid_filt_data_matrix), np.mean(resid_data_matrix))
-
-
+                    plot_pair_signals(plot_diff_filt_ts_file,
+                                      np.mean(resid_filt_data_matrix, axis = 0),
+                                      np.mean(resid_data_matrix, axis = 0))
         else:
-
             # Using only regression
             resid_ts_file = os.path.abspath('resid_ts.npy')
             np.save(resid_ts_file, resid_data_matrix)
