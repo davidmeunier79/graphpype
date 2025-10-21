@@ -1108,7 +1108,9 @@ class RegressCovar(BaseInterface):
                 # plotting resid_ts
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
 
-                plot_pair_signals(plot_mean_resid_ts_file, np.mean(unregressed_norm_data), np.mean(z_score_data_matrix, axis = 0))
+                plot_pair_signals(plot_mean_resid_ts_file,
+                                  np.mean(unregressed_norm_data, axis = 0),
+                                  np.mean(z_score_data_matrix, axis = 0))
 
 
 
