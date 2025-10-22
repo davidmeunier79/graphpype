@@ -168,7 +168,7 @@ def plot_sep_signals(plot_signals_file, list_signals_matrix, colors=[], labels=[
 
             biased_signals.append(list_signals_matrix[i] + bias)
 
-    plot_signals(plot_signals_file, signals_matrix, ylim=[ , ],
+    plot_signals(plot_signals_file, signals_matrix, ylim=[],
                  colors=colors, labels=labels)
 
 #
