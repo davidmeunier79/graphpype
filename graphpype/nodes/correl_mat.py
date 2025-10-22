@@ -1112,7 +1112,7 @@ class RegressCovar(BaseInterface):
 
                 plot_sep_signals(plot_mean_resid_ts_file,
                                   [np.mean(unregressed_norm_data, axis = 0),
-                                  np.mean(regressed_norm_data, axis = 0])
+                                  np.mean(regressed_norm_data, axis = 0)])
 
 
 
