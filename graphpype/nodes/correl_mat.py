@@ -1071,6 +1071,14 @@ class RegressCovar(BaseInterface):
             keep_regs = [a for a in regs if a is not None]
             rp = np.concatenate(keep_regs, axis=1)
 
+            if self.inputs.plot_fig:
+
+                norm_confounds = normalize_data(rp)
+
+                #  saving filtered_ts
+                filtered_ts_file = os.path.abspath('norm_confounds.npy')
+                np.save(filtered_ts_file, filtered_norm_data)
+
             # regression movement parameters, return the residuals
             resid_data_matrix = regress_parameters(data_mask_matrix, rp)
 
@@ -1111,10 +1119,8 @@ class RegressCovar(BaseInterface):
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
 
                 plot_sep_signals(plot_mean_resid_ts_file,
-                                  [np.mean(unregressed_norm_data, axis = 0),
-                                  np.mean(regressed_norm_data, axis = 0)])
-
-
+                                  np.concatenate([np.mean(unregressed_norm_data, axis = 0),
+                                  np.mean(regressed_norm_data, axis = 0)]), axis = 1)
 
                 # plotting diff filtered and non filtered data
                 plot_unreg_norm_ts_file = os.path.abspath('unreg_norm_ts.pdf')
@@ -1129,9 +1135,9 @@ class RegressCovar(BaseInterface):
                     plot_mean_filt_resid_ts_file = os.path.abspath('mean_filt_resid_ts.pdf')
 
                     plot_sep_signals(plot_mean_filt_resid_ts_file,
-                                    [np.mean(unregressed_norm_data, axis = 0),
+                                    np.concatenate([np.mean(unregressed_norm_data, axis = 0),
                                     np.mean(regressed_norm_data, axis = 0),
-                                    np.mean(filtered_norm_data, axis = 0)])
+                                    np.mean(filtered_norm_data, axis = 0)], axis = 1))
 
                     # plotting diff filtered and non filtered data
                     plot_filt_norm_ts_file = os.path.abspath('filt_norm_ts.pdf')

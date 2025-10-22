@@ -146,30 +146,64 @@ def plot_signals(plot_signals_file, signals_matrix, colors=[],
     #plt.close(fig2)
 
 
-def plot_sep_signals(plot_signals_file, list_signals_matrix, colors=[], labels=[],
+def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
                      range_signal=1):
     """Plotting signals separately"""
     # keeping for sake of compatibility
+    assert len(signals_matrix.shape) == 2, ("No interest to use \
+        plot_sep_signals, use plot_signals instead")
 
-    assert len(list_signals_matrix) != 0, "No signal was found"
+    print(np.amax(signals_matrix, axis = 1))
+    print(np.amax(signals_matrix, axis = 1) - np.amin(signals_matrix, axis = 1))
+    0/0
 
-    if len(list_signals_matrix) ==1:
-        plot_signals(plot_signals_file, list_signals_matrix[0], colors=[], labels=[])
-    else:
+    range_signal *= (np.amax(signals_matrix, ) - np.amin(signals_matrix))
 
-        biased_signals = [list_signals_matrix[0]]
-        bias = 0
-        for i in range(list_signals_matrix[1:]):
-            assert len(list_signals_matrix[i].shape) == 1, "not a vector"
-            assert list_signals_matrix[0].shape[0] == list_signals_matrix[i].shape[0], \
-                "vector are not the same shame"
+    nb_signals = signals_matrix.shape[0]
+    nb_timings = signals_matrix.shape[1]
 
-            bias += np.abs(np.min(list_signals_matrix[i])) + np.abs(np.max(list_signals_matrix[i-1]))
+    bias = 0
+    biased_signals = [signals_matrix[0]
+    print(biased_signals.shape)
 
-            biased_signals.append(list_signals_matrix[i] + bias)
+    for i in range()
+    bias_matrix = np.array([[i*range_signal]*nb_timings
+                           for i in range(nb_signals)])
+
+    signals_matrix = signals_matrix+bias_matrix
+    #ymin = np.amin(signals_matrix)-2
+    #ymax = np.amax(signals_matrix)+2
 
     plot_signals(plot_signals_file, signals_matrix, ylim=[],
                  colors=colors, labels=labels)
+
+
+# def plot_sep_signals(plot_signals_file, list_signals_matrix, colors=[], labels=[],
+#                      range_signal=1):
+#     """Plotting signals separately"""
+#     # keeping for sake of compatibility
+#
+#     assert len(list_signals_matrix) != 0, "No signal was found"
+#
+#     assert len(list_signals_matrix[0].shape) == 1, , "not a vector"
+#
+#     if len(list_signals_matrix) ==1:
+#         plot_signals(plot_signals_file, list_signals_matrix[0], colors=[], labels=[])
+#     else:
+#
+#         biased_signals = [list_signals_matrix[0]]
+#         bias = 0
+#         for i in range(list_signals_matrix[1:]):
+#             assert len(list_signals_matrix[i].shape) == 1, "not a vector"
+#             assert list_signals_matrix[0].shape[0] == list_signals_matrix[i].shape[0], \
+#                 "vector are not the same shame"
+#
+#             bias += np.abs(np.min(list_signals_matrix[i])) + np.abs(np.max(list_signals_matrix[i-1]))
+#
+#             biased_signals.append(list_signals_matrix[i] + bias)
+#
+#     plot_signals(plot_signals_file, signals_matrix, ylim=[],
+#                  colors=colors, labels=labels)
 
 #
 # def plot_three_signals(plot_signals_file, signal1, signal2, signal3, colors=[], labels=[],
