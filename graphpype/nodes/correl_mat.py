@@ -21,7 +21,6 @@ from graphpype.utils_plot import (plot_signals,
                                   plot_three_signals,
                                   plot_hist, plot_cormat)
 
-
 from graphpype.utils_cor import (return_corres_correl_mat,
                                  return_corres_correl_mat_labels,
                                  return_conf_cor_mat, regress_parameters,
@@ -1086,7 +1085,7 @@ class RegressCovar(BaseInterface):
             regressed_norm_data = normalize_data(resid_data_matrix)
 
             #  saving regressed_ts
-            regressed_ts_file = os.path.abspath('regressed_ts.npy')
+            regressed_ts_file = os.path.abspath('resid_ts.npy')
             np.save(regressed_ts_file, regressed_norm_data)
 
             if self.inputs.filtered_residuals:
