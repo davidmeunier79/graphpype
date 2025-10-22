@@ -168,6 +168,33 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
                  colors=colors, labels=labels)
 
 
+def plot_three_signals(plot_signals_file, signal1, signal2, signal3, colors=[], labels=[],
+                     range_signal=1):
+    """Plotting signals separately"""
+
+    # keeping for sake of compatibility
+    assert len(signal1.shape) == 1, "signal1 should be a vector"
+    assert len(signal2.shape) == 1, "signal2 should be a vector"
+    assert len(signal3.shape) == 1, "signal3 should be a vector"
+
+    assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
+
+    assert signal1.shape[0] == signal3.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal3.shape[0]}")
+
+    min_2 = np.min(signal2)
+    max_1 = np.max(signal1)
+
+    min_3 = np.min(signal3)
+    max_2 = np.max(signal2)
+
+    signals_matrix = np.vstack((signal1,
+                                signal2 + np.abs(max_1)+ np.abs(min_2),
+                                signal3 + np.abs(max_1)+ np.abs(min_2) + np.abs(max_2)+ np.abs(min_3)))
+    print(signals_matrix.shape)
+
+    plot_signals(plot_signals_file, signals_matrix, ylim = [],
+                 colors=colors, labels=labels)
+
 def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
                      range_signal=1):
     """Plotting signals separately"""

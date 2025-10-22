@@ -1122,14 +1122,6 @@ class RegressCovar(BaseInterface):
                 plot_reg_norm_ts_file = os.path.abspath('reg_norm_ts.pdf')
                 plot_signals(plot_reg_norm_ts_file, z_score_data_matrix)
 
-                if self.inputs.filtered_residuals:
-
-                    # plotting diff filtered and non filtered data
-                    plot_diff_filt_ts_file = os.path.abspath('diff_filt_ts.pdf')
-
-                    plot_pair_signals(plot_diff_filt_ts_file,
-                                      np.mean(resid_filt_data_matrix, axis = 0),
-                                      np.mean(resid_data_matrix, axis = 0))
         else:
             # Using only regression
             resid_ts_file = os.path.abspath('resid_ts.npy')
