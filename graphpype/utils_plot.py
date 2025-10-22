@@ -150,6 +150,9 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
                      range_signal=1):
     """Plotting signals separately"""
     # keeping for sake of compatibility
+
+    print(signals_matrix.shape)
+
     assert len(signals_matrix.shape) == 2, ("No interest to use \
         plot_sep_signals, use plot_signals instead")
 
