@@ -166,7 +166,7 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
 
     print(biased_signals.shape)
 
-    for i in range(1, signals_matrix.shape[0])
+    for i in range(1, signals_matrix.shape[0]):
         bias += range_signal[i-1]
         biased_signals.append(signals_matrix[i, :] + bias)
 
