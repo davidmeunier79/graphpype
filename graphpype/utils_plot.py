@@ -146,69 +146,73 @@ def plot_signals(plot_signals_file, signals_matrix, colors=[],
     #plt.close(fig2)
 
 
-def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
+def plot_sep_signals(plot_signals_file, list_signals_matrix, colors=[], labels=[],
                      range_signal=1):
     """Plotting signals separately"""
     # keeping for sake of compatibility
-    assert len(signals_matrix.shape) == 2, ("No interest to use \
-        plot_sep_signals, use plot_signals instead")
 
-    range_signal *= (np.amax(signals_matrix) - np.amin(signals_matrix))
+    assert len(list_signals_matrix) != 0, "No signal was found"
 
-    nb_signals = signals_matrix.shape[0]
-    nb_timings = signals_matrix.shape[1]
+    if len(list_signals_matrix) ==1:
+        plot_signals(plot_signals_file, list_signals_matrix[0], colors=[], labels=[])
+    else:
 
-    bias_matrix = np.array([[i*range_signal]*nb_timings
-                           for i in range(nb_signals)])
-    signals_matrix = signals_matrix+bias_matrix
-    ymin = np.amin(signals_matrix)-2
-    ymax = np.amax(signals_matrix)+2
+        biased_signals = [list_signals_matrix[0]]
+        bias = 0
+        for i in range(list_signals_matrix[1:]):
+            assert len(list_signals_matrix[i].shape) == 1, "not a vector"
+            assert list_signals_matrix[0].shape[0] == list_signals_matrix[i].shape[0], \
+                "vector are not the same shame"
 
-    plot_signals(plot_signals_file, signals_matrix, ylim=[ymin, ymax],
+            bias += np.abs(np.min(list_signals_matrix[i])) + np.abs(np.max(list_signals_matrix[i-1]))
+
+            biased_signals.append(list_signals_matrix[i] + bias)
+
+    plot_signals(plot_signals_file, signals_matrix, ylim=[ , ],
                  colors=colors, labels=labels)
 
-
-def plot_three_signals(plot_signals_file, signal1, signal2, signal3, colors=[], labels=[],
-                     range_signal=1):
-    """Plotting signals separately"""
-
-    # keeping for sake of compatibility
-    assert len(signal1.shape) == 1, "signal1 should be a vector"
-    assert len(signal2.shape) == 1, "signal2 should be a vector"
-    assert len(signal3.shape) == 1, "signal3 should be a vector"
-
-    assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
-
-    assert signal1.shape[0] == signal3.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal3.shape[0]}")
-
-    min_2 = np.min(signal2)
-    max_1 = np.max(signal1)
-
-    min_3 = np.min(signal3)
-    max_2 = np.max(signal2)
-
-    signals_matrix = np.vstack((signal1,
-                                signal2 + np.abs(max_1)+ np.abs(min_2),
-                                signal3 + np.abs(max_1)+ np.abs(min_2) + np.abs(max_2)+ np.abs(min_3)))
-    print(signals_matrix.shape)
-
-    plot_signals(plot_signals_file, signals_matrix, ylim = [],
-                 colors=colors, labels=labels)
-
-def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
-                     range_signal=1):
-    """Plotting signals separately"""
-
-    # keeping for sake of compatibility
-    assert len(signal1.shape) == 1, "signal1 should be a vector"
-    assert len(signal2.shape) == 1, "signal2 should be a vector"
-
-    assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
-
-    min_2 = np.min(signal2)
-    max_1 = np.max(signal1)
-    signals_matrix = np.vstack((signal1, signal2 + np.abs(max_1)+ np.abs(min_2)))
-    print(signals_matrix.shape)
-
-    plot_signals(plot_signals_file, signals_matrix, ylim = [],
-                 colors=colors, labels=labels)
+#
+# def plot_three_signals(plot_signals_file, signal1, signal2, signal3, colors=[], labels=[],
+#                      range_signal=1):
+#     """Plotting signals separately"""
+#
+#     # keeping for sake of compatibility
+#     assert len(signal1.shape) == 1, "signal1 should be a vector"
+#     assert len(signal2.shape) == 1, "signal2 should be a vector"
+#     assert len(signal3.shape) == 1, "signal3 should be a vector"
+#
+#     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
+#
+#     assert signal1.shape[0] == signal3.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal3.shape[0]}")
+#
+#     min_2 = np.min(signal2)
+#     max_1 = np.max(signal1)
+#
+#     min_3 = np.min(signal3)
+#     max_2 = np.max(signal2)
+#
+#     signals_matrix = np.vstack((signal1,
+#                                 signal2 + np.abs(max_1)+ np.abs(min_2),
+#                                 signal3 + np.abs(max_1)+ np.abs(min_2) + np.abs(max_2)+ np.abs(min_3)))
+#     print(signals_matrix.shape)
+#
+#     plot_signals(plot_signals_file, signals_matrix, ylim = [],
+#                  colors=colors, labels=labels)
+#
+# def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
+#                      range_signal=1):
+#     """Plotting signals separately"""
+#
+#     # keeping for sake of compatibility
+#     assert len(signal1.shape) == 1, "signal1 should be a vector"
+#     assert len(signal2.shape) == 1, "signal2 should be a vector"
+#
+#     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
+#
+#     min_2 = np.min(signal2)
+#     max_1 = np.max(signal1)
+#     signals_matrix = np.vstack((signal1, signal2 + np.abs(max_1)+ np.abs(min_2)))
+#     print(signals_matrix.shape)
+#
+#     plot_signals(plot_signals_file, signals_matrix, ylim = [],
+#                  colors=colors, labels=labels)

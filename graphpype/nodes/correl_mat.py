@@ -17,8 +17,6 @@ import pandas as pd
 
 from graphpype.utils_plot import (plot_signals,
                                   plot_sep_signals,
-                                  plot_pair_signals,
-                                  plot_three_signals,
                                   plot_hist, plot_cormat)
 
 from graphpype.utils_cor import (return_corres_correl_mat,
@@ -1112,9 +1110,9 @@ class RegressCovar(BaseInterface):
                 # plotting resid_ts
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
 
-                plot_pair_signals(plot_mean_resid_ts_file,
-                                  np.mean(unregressed_norm_data, axis = 0),
-                                  np.mean(regressed_norm_data, axis = 0))
+                plot_sep_signals(plot_mean_resid_ts_file,
+                                  [np.mean(unregressed_norm_data, axis = 0),
+                                  np.mean(regressed_norm_data, axis = 0])
 
 
 
@@ -1130,10 +1128,10 @@ class RegressCovar(BaseInterface):
 
                     plot_mean_filt_resid_ts_file = os.path.abspath('mean_filt_resid_ts.pdf')
 
-                    plot_three_signals(plot_mean_filt_resid_ts_file,
-                                    np.mean(unregressed_norm_data, axis = 0),
+                    plot_sep_signals(plot_mean_filt_resid_ts_file,
+                                    [np.mean(unregressed_norm_data, axis = 0),
                                     np.mean(regressed_norm_data, axis = 0),
-                                    np.mean(filtered_norm_data, axis = 0))
+                                    np.mean(filtered_norm_data, axis = 0)])
 
                     # plotting diff filtered and non filtered data
                     plot_filt_norm_ts_file = os.path.abspath('filt_norm_ts.pdf')
