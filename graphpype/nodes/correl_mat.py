@@ -1079,25 +1079,24 @@ class RegressCovar(BaseInterface):
 
             unregressed_norm_data = normalize_data(data_mask_matrix)
 
+            # normalizing
+            regressed_norm_data = normalize_data(resid_data_matrix)
+
+            #  saving regressed_ts
+            regressed_ts_file = os.path.abspath('regressed_ts.npy')
+            np.save(regressed_ts_file, regressed_norm_data)
+
             if self.inputs.filtered_residuals:
 
                 # filtering data
                 resid_filt_data_matrix = filter_data(resid_data_matrix)
 
                 # normalizing
-                z_score_data_matrix = normalize_data(resid_filt_data_matrix)
+                filtered_norm_data = normalize_data(resid_filt_data_matrix)
 
-            else:
-
-                # normalizing
-                z_score_data_matrix = normalize_data(resid_data_matrix)
-
-            #  saving resid_ts
-            resid_ts_file = os.path.abspath('resid_ts.npy')
-            np.save(resid_ts_file, z_score_data_matrix)
-
-            resid_ts_txt_file = os.path.abspath('resid_ts.txt')
-            np.savetxt(resid_ts_txt_file, z_score_data_matrix, fmt='%0.3f')
+                #  saving filtered_ts
+                filtered_ts_file = os.path.abspath('filtered_ts.npy')
+                np.save(filtered_ts_file, filtered_norm_data)
 
             if self.inputs.plot_fig:
                 #
@@ -1110,7 +1109,7 @@ class RegressCovar(BaseInterface):
 
                 plot_pair_signals(plot_mean_resid_ts_file,
                                   np.mean(unregressed_norm_data, axis = 0),
-                                  np.mean(z_score_data_matrix, axis = 0))
+                                  np.mean(regressed_norm_data, axis = 0))
 
 
 
@@ -1120,7 +1119,21 @@ class RegressCovar(BaseInterface):
 
                 # plotting diff filtered and non filtered data
                 plot_reg_norm_ts_file = os.path.abspath('reg_norm_ts.pdf')
-                plot_signals(plot_reg_norm_ts_file, z_score_data_matrix)
+                plot_signals(plot_reg_norm_ts_file, regressed_norm_data)
+
+                if self.inputs.filtered_residuals:
+
+                    plot_mean_filt_resid_ts_file = os.path.abspath('mean_filt_resid_ts.pdf')
+
+                    plot_three_signals(plot_mean_filt_resid_ts_file,
+                                    np.mean(unregressed_norm_data, axis = 0),
+                                    np.mean(regressed_norm_data, axis = 0),
+                                    np.mean(filtered_norm_data, axis = 0))
+
+                    # plotting diff filtered and non filtered data
+                    plot_filt_norm_ts_file = os.path.abspath('filt_norm_ts.pdf')
+                    plot_signals(plot_filt_norm_ts_file, filtered_norm_data)
+
 
         else:
             # Using only regression
