@@ -1091,7 +1091,10 @@ class RegressCovar(BaseInterface):
             if self.inputs.filtered_residuals:
 
                 # filtering data
-                resid_filt_data_matrix = filter_data(resid_data_matrix)
+                resid_filt_data_matrix = filter_data(resid_data_matrix,
+                                                     N=5,
+                                                     Wn = [0.1, 0.01],
+                                                     btype = 'bandpass')
 
                 # normalizing
                 filtered_norm_data = normalize_data(resid_filt_data_matrix)
