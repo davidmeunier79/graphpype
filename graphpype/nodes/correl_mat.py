@@ -1093,7 +1093,7 @@ class RegressCovar(BaseInterface):
                 # filtering data
                 resid_filt_data_matrix = filter_data(resid_data_matrix,
                                                      N=5,
-                                                     Wn = [0.1, 0.01],
+                                                     Wn = [ 0.01, 0.1],
                                                      btype = 'bandpass')
 
                 # normalizing
