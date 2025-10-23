@@ -163,9 +163,6 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
 
     bias = np.abs(np.amax(signals_matrix[:, 0]))
 
-    print(max_sig)
-    print(max_sig.shape)
-
     biased_signals = [signals_matrix[:, 0] + bias]
 
     bias += np.abs(np.amin(signals_matrix[:, 0]))
