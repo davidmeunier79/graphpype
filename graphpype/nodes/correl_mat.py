@@ -1088,7 +1088,7 @@ class RegressCovar(BaseInterface):
             if self.inputs.plot_fig:
 
                 plot_norm_confounds_file = os.path.abspath('norm_confounds.pdf')
-                plot_sep_signals(plot_norm_confounds_file, norm_confounds)
+                plot_sep_signals(plot_norm_confounds_file, norm_confounds.T)
 
 
             # regression movement parameters, return the residuals
