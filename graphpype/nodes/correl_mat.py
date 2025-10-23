@@ -1084,12 +1084,10 @@ class RegressCovar(BaseInterface):
             norm_confounds_file = os.path.abspath('norm_confounds.npy')
             np.save(norm_confounds_file, norm_confounds)
 
-
             if self.inputs.plot_fig:
 
                 plot_norm_confounds_file = os.path.abspath('norm_confounds.pdf')
                 plot_sep_signals(plot_norm_confounds_file, norm_confounds.T)
-
 
             # regression movement parameters, return the residuals
             resid_data_matrix = regress_parameters(data_mask_matrix, rp)
