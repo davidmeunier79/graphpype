@@ -165,6 +165,9 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
     min_sig = np.abs(np.amin(signals_matrix, axis = 0))
     print(min_sig)
 
+    nb_signals = signals_matrix.shape[1]
+    nb_timings = signals_matrix.shape[0]
+
     bias = 0
     biased_signals = [signals_matrix[:, 0]]
 
