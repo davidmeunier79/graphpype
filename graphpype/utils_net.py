@@ -49,8 +49,8 @@ def read_Pajek_corres_nodes(Pajek_net_file):
             if (i+1) == int(new_index):
                 node_corres[i] = int(old_index)-1
             else:
-                print("Warning, incompatible indexes {} {}".format(new_index,
-                                                                   i+1))
+                print("Warning, incompatible indexes {} {}".format(
+                    new_index, i+1))
         f.close()
 
     return node_corres
