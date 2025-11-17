@@ -17,7 +17,8 @@ import pandas as pd
 
 from graphpype.utils_plot import (plot_signals,
                                   plot_sep_signals,
-                                  plot_hist, plot_cormat)
+                                  plot_hist, plot_cormat,
+                                  plot_fft)
 
 from graphpype.utils_cor import (return_corres_correl_mat,
                                  return_corres_correl_mat_labels,
