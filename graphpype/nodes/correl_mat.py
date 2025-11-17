@@ -1143,7 +1143,7 @@ class RegressCovar(BaseInterface):
 
                 # fft
                 plot_mean_unreg_resid_fft_file = os.path.abspath('mean_unreg_resid_fft.pdf')
-                plot_fft(plot_mean_filt_resid_fft_file, mean_unregressed_norm_data)
+                plot_fft(plot_mean_unreg_resid_fft_file, mean_unregressed_norm_data)
 
                 # plotting diff filtered and non filtered data
                 plot_reg_norm_ts_file = os.path.abspath('reg_norm_ts.pdf')
