@@ -240,11 +240,9 @@ def plot_fft(plot_fft_file, signal_vect):
     fig2 = plt.figure()
     ax = fig2.add_subplot(1, 1, 1)
 
-    fig2.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
+    ax.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
 
-    plt.grid()
-
-    plt.show()
+    ax.grid()
 
     fig2.savefig(plot_fft_file)
     assert os.path.exists(plot_fft_file), \
