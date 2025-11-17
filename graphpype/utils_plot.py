@@ -228,7 +228,7 @@ def plot_fft(plot_fft_file, signal_vect):
 
     print(signal_vect.shape)
 
-    N = signal_vect.shape[0]
+    N = float(signal_vect.shape[0])
 
     T = 1.0/1000.0
 
