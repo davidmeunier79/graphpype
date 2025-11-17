@@ -230,7 +230,7 @@ def plot_fft(plot_fft_file, signal_vect):
 
     N = signal_vect.shape[0]
 
-    T = 1/100
+    T = 1.0/1000.0
 
     yf = fft(signal_vect)
 
