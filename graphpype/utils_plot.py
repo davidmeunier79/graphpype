@@ -221,7 +221,7 @@ def plot_fft(signals):
 def plot_fft(plot_fft_file, signal_vect):
 
     import matplotlib.pyplot as plt
-
+    from scipy.fft import fft, fftfreq
 
     if len(signal_vect.shape) == 2:
         signal_vect = signal_vect.reshape(-1, 1)
