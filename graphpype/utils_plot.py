@@ -174,76 +174,98 @@ def plot_sep_signals(plot_signals_file, signals_matrix, colors=[], labels=[],
     plot_signals(plot_signals_file, biased_signals_matrix, ylim=[],
                  colors=colors, labels=labels)
 
+def plot_fft(signals):
 
-# def plot_sep_signals(plot_signals_file, list_signals_matrix, colors=[], labels=[],
-#                      range_signal=1):
-#     """Plotting signals separately"""
-#     # keeping for sake of compatibility
-#
-#     assert len(list_signals_matrix) != 0, "No signal was found"
-#
-#     assert len(list_signals_matrix[0].shape) == 1, , "not a vector"
-#
-#     if len(list_signals_matrix) ==1:
-#         plot_signals(plot_signals_file, list_signals_matrix[0], colors=[], labels=[])
-#     else:
-#
-#         biased_signals = [list_signals_matrix[0]]
-#         bias = 0
-#         for i in range(list_signals_matrix[1:]):
-#             assert len(list_signals_matrix[i].shape) == 1, "not a vector"
-#             assert list_signals_matrix[0].shape[0] == list_signals_matrix[i].shape[0], \
-#                 "vector are not the same shame"
-#
-#             bias += np.abs(np.min(list_signals_matrix[i])) + np.abs(np.max(list_signals_matrix[i-1]))
-#
-#             biased_signals.append(list_signals_matrix[i] + bias)
-#
-#     plot_signals(plot_signals_file, signals_matrix, ylim=[],
-#                  colors=colors, labels=labels)
+    import matplotlib.pyplot as plt
 
-#
-# def plot_three_signals(plot_signals_file, signal1, signal2, signal3, colors=[], labels=[],
-#                      range_signal=1):
-#     """Plotting signals separately"""
-#
-#     # keeping for sake of compatibility
-#     assert len(signal1.shape) == 1, "signal1 should be a vector"
-#     assert len(signal2.shape) == 1, "signal2 should be a vector"
-#     assert len(signal3.shape) == 1, "signal3 should be a vector"
-#
-#     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
-#
-#     assert signal1.shape[0] == signal3.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal3.shape[0]}")
-#
-#     min_2 = np.min(signal2)
-#     max_1 = np.max(signal1)
-#
-#     min_3 = np.min(signal3)
-#     max_2 = np.max(signal2)
-#
-#     signals_matrix = np.vstack((signal1,
-#                                 signal2 + np.abs(max_1)+ np.abs(min_2),
-#                                 signal3 + np.abs(max_1)+ np.abs(min_2) + np.abs(max_2)+ np.abs(min_3)))
-#     print(signals_matrix.shape)
-#
-#     plot_signals(plot_signals_file, signals_matrix, ylim = [],
-#                  colors=colors, labels=labels)
-#
-# def plot_pair_signals(plot_signals_file, signal1, signal2, colors=[], labels=[],
-#                      range_signal=1):
-#     """Plotting signals separately"""
-#
-#     # keeping for sake of compatibility
-#     assert len(signal1.shape) == 1, "signal1 should be a vector"
-#     assert len(signal2.shape) == 1, "signal2 should be a vector"
-#
-#     assert signal1.shape[0] == signal2.shape[0], (f"Signals should have the same length {signal1.shape[0]} =! {signal2.shape[0]}")
-#
-#     min_2 = np.min(signal2)
-#     max_1 = np.max(signal1)
-#     signals_matrix = np.vstack((signal1, signal2 + np.abs(max_1)+ np.abs(min_2)))
-#     print(signals_matrix.shape)
-#
-#     plot_signals(plot_signals_file, signals_matrix, ylim = [],
-#                  colors=colors, labels=labels)
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(1, 1, 1)
+
+    if len(ylim) == 2:
+        ax.set_ylim(ylim[0], ylim[1])
+
+    if len(signals_matrix.shape) == 1:
+        ax.plot(list(range(signals_matrix.shape[0])), signals_matrix[:])
+
+    elif len(signals_matrix.shape) == 2:
+
+        nb_signals = signals_matrix.shape[0]
+        nb_timings = signals_matrix.shape[1]
+
+        signals_matrix = np.transpose(signals_matrix)
+        lines = ax.plot(list(range(signals_matrix.shape[0])), signals_matrix)
+
+        # adding color if available
+        if len(colors) == nb_signals:
+            [line.set_color(color) for color, line in zip(colors, lines)]
+        elif len(colors) == 1:
+            [line.set_color(colors[0]) for line in lines]
+
+        # adding labels in available
+        if len(labels) == nb_signals:
+            [line.set_label(label) for label, line in zip(labels, lines)]
+            ax.legend(handles=lines, loc=0, prop={'size': 8})
+
+        # adding zero line
+        if add_zero_line:
+            ax.plot(list(range(nb_timings)), [0.0]*nb_timings,
+                    color='black', linestyle='--')
+
+    fig2.savefig(plot_signals_file)
+    assert os.path.exists(plot_signals_file), \
+        "Error with plotting {}".format(plot_signals_file)
+
+
+
+
+def plot_fft(plot_fft_file, signal_vect):
+
+    import matplotlib.pyplot as plt
+
+
+    if len(signal_vect.shape) == 2
+
+        signal_vect = signal_vect.reshape(-1, 1)
+
+    print(signal_vect.shape)
+
+    N = signal_vect.shape[0]
+
+    T = 1/100
+
+    yf = fft(y)
+
+    xf = fftfreq(N, T)[:N//2]
+
+
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(1, 1, 1)
+
+    fig2.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
+
+    plt.grid()
+
+    plt.show()
+
+    fig2.savefig(plot_fft_file)
+    assert os.path.exists(plot_fft_file), \
+        "Error with plotting {}".format(plot_signals_file)
+
+    #
+    #
+    #
+    # #bias = 0
+    # bias = np.abs(np.amax(signals_matrix[:, 0]))
+    # biased_signals = [signals_matrix[:, 0] + bias]
+    # bias += np.abs(np.amin(signals_matrix[:, 0]))
+    #
+    # for i in range(1, nb_signals):
+    #     bias +=  np.abs(np.min(signals_matrix[:, i]))
+    #     biased_signals.append(signals_matrix[:, i] + bias)
+    #     bias +=  np.abs(np.max(signals_matrix[:, i]))
+    #
+    # biased_signals_matrix = np.array(biased_signals)
+    #
+    # plot_signals(plot_signals_file, biased_signals_matrix, ylim=[],
+    #              colors=colors, labels=labels)
+    #

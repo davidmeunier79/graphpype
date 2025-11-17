@@ -1096,9 +1096,11 @@ class RegressCovar(BaseInterface):
 
 
             unregressed_norm_data = normalize_data(data_mask_matrix)
+            mean_unregressed_norm_data = np.mean(unregressed_norm_data, axis = 0).reshape(-1,1)
 
             # normalizing
             regressed_norm_data = normalize_data(resid_data_matrix)
+            mean_regressed_norm_data = np.mean(regressed_norm_data, axis = 0).reshape(-1,1)
 
             #  saving regressed_ts
             regressed_ts_file = os.path.abspath('resid_ts.npy')
@@ -1114,6 +1116,7 @@ class RegressCovar(BaseInterface):
 
                 # normalizing
                 filtered_norm_data = normalize_data(resid_filt_data_matrix)
+                mean_filtered_norm_data = np.mean(filtered_norm_data, axis = 0).reshape(-1,1)
 
                 #  saving filtered_ts
                 filtered_ts_file = os.path.abspath('filtered_ts.npy')
@@ -1129,13 +1132,17 @@ class RegressCovar(BaseInterface):
                 plot_mean_resid_ts_file = os.path.abspath('mean_resid_ts.pdf')
 
                 plot_sep_signals(plot_mean_resid_ts_file,
-                                  np.concatenate([np.mean(unregressed_norm_data, axis = 0).reshape(-1,1),
-                                  np.mean(regressed_norm_data, axis = 0).reshape(-1,1)],
+                                  np.concatenate([mean_unregressed_norm_data,
+                                  mean_regressed_norm_data],
                                   axis = 1))
 
                 # plotting diff filtered and non filtered data
                 plot_unreg_norm_ts_file = os.path.abspath('unreg_norm_ts.pdf')
                 plot_signals(plot_unreg_norm_ts_file, unregressed_norm_data)
+
+                # fft
+                plot_mean_unreg_resid_fft_file = os.path.abspath('mean_unreg_resid_fft.pdf')
+                plot_fft(plot_mean_filt_resid_fft_file, mean_unregressed_norm_data)
 
                 # plotting diff filtered and non filtered data
                 plot_reg_norm_ts_file = os.path.abspath('reg_norm_ts.pdf')
@@ -1147,15 +1154,18 @@ class RegressCovar(BaseInterface):
 
                     plot_sep_signals(plot_mean_filt_resid_ts_file,
                                     np.concatenate(
-                                        [np.mean(unregressed_norm_data, axis = 0).reshape(-1,1),
-                                         np.mean(regressed_norm_data, axis = 0).reshape(-1,1),
-                                         np.mean(filtered_norm_data, axis = 0).reshape(-1,1)],
+                                        [mean_unregressed_norm_data,
+                                         mean_regressed_norm_data,
+                                         mean_filtered_norm_data],
                                     axis = 1))
 
                     # plotting diff filtered and non filtered data
                     plot_filt_norm_ts_file = os.path.abspath('filt_norm_ts.pdf')
                     plot_signals(plot_filt_norm_ts_file, filtered_norm_data)
 
+                    # fft
+                    plot_mean_filt_resid_fft_file = os.path.abspath('mean_filt_resid_fft.pdf')
+                    plot_fft(plot_mean_filt_resid_fft_file, mean_filtered_norm_data)
 
         else:
             # Using only regression
