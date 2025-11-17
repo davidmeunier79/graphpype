@@ -1100,7 +1100,7 @@ class RegressCovar(BaseInterface):
             mean_unregressed_norm_data = np.mean(unregressed_norm_data, axis = 0).reshape(-1,1)
 
             unreg_norm_ts_file = os.path.abspath('unreg_norm_ts.npy')
-            np.save(unreg_norm_ts, unregressed_norm_data)
+            np.save(unreg_norm_ts_file, unregressed_norm_data)
 
             # normalizing
             regressed_norm_data = normalize_data(resid_data_matrix)
