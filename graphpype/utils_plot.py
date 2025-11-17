@@ -223,8 +223,7 @@ def plot_fft(plot_fft_file, signal_vect):
     import matplotlib.pyplot as plt
 
 
-    if len(signal_vect.shape) == 2
-
+    if len(signal_vect.shape) == 2:
         signal_vect = signal_vect.reshape(-1, 1)
 
     print(signal_vect.shape)
