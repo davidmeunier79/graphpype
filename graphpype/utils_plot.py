@@ -232,7 +232,7 @@ def plot_fft(plot_fft_file, signal_vect):
 
     T = 1/100
 
-    yf = fft(y)
+    yf = fft(signal_vect)
 
     xf = fftfreq(N, T)[:N//2]
 
